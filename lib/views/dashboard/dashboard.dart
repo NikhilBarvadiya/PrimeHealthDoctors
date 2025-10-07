@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:prime_health_doctors/utils/decoration.dart';
-import 'package:prime_health_doctors/utils/routes/route_name.dart';
-import 'package:prime_health_doctors/utils/storage.dart';
+import 'package:prime_health_doctors/views/dashboard/profile/profile.dart';
 import 'dashboard_ctrl.dart';
 
 class Dashboard extends StatelessWidget {
@@ -17,18 +16,7 @@ class Dashboard extends StatelessWidget {
           canPop: false,
           child: Obx(
             () => Scaffold(
-              appBar: AppBar(
-                actions: [
-                  IconButton(
-                    onPressed: () {
-                      clearStorage();
-                      Get.offAllNamed(AppRouteNames.login);
-                    },
-                    icon: Icon(Icons.logout),
-                  ),
-                ],
-              ),
-              body: IndexedStack(index: ctrl.currentIndex.value, children: [Container(), Container(), Container()]),
+              body: IndexedStack(index: ctrl.currentIndex.value, children: [Container(), Container(), Profile()]),
               // body: IndexedStack(index: ctrl.currentIndex.value, children: [Home(), Services(), Profile()]),
               bottomNavigationBar: Container(
                 decoration: BoxDecoration(

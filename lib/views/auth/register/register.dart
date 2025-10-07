@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:prime_health_doctors/models/service_model.dart';
 import 'package:prime_health_doctors/utils/theme/light.dart';
 import 'package:prime_health_doctors/views/auth/register/register_ctrl.dart';
-import 'package:prime_health_doctors/views/auth/register/ui/multi_selection_bottom_sheet.dart';
+import 'package:prime_health_doctors/views/auth/register/ui/service_selection_ui.dart';
 
 class Register extends StatelessWidget {
   const Register({super.key});
@@ -604,13 +604,7 @@ class Register extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (context) => ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        child: MultiSelectBottomSheet(
-          title: 'Select Medical Services',
-          items: ctrl.services,
-          selectedItems: ctrl.selectedServices,
-          onSelectionChanged: ctrl.updateSelectedServices,
-          itemType: 'services',
-        ),
+        child: ServiceSelectionUI(title: 'Select Medical Services', items: ctrl.services, selectedItems: ctrl.selectedServices, onSelectionChanged: ctrl.updateSelectedServices, itemType: 'services'),
       ),
     );
   }

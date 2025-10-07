@@ -3,20 +3,20 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:prime_health_doctors/models/service_model.dart';
 import 'package:prime_health_doctors/utils/theme/light.dart';
 
-class MultiSelectBottomSheet extends StatefulWidget {
+class ServiceSelectionUI extends StatefulWidget {
   final String title;
   final List<ServiceModel> items;
   final List<ServiceModel> selectedItems;
   final Function(List<ServiceModel>) onSelectionChanged;
   final String itemType;
 
-  const MultiSelectBottomSheet({super.key, required this.title, required this.items, required this.selectedItems, required this.onSelectionChanged, required this.itemType});
+  const ServiceSelectionUI({super.key, required this.title, required this.items, required this.selectedItems, required this.onSelectionChanged, required this.itemType});
 
   @override
-  State<MultiSelectBottomSheet> createState() => _MultiSelectBottomSheetState();
+  State<ServiceSelectionUI> createState() => _ServiceSelectionUIState();
 }
 
-class _MultiSelectBottomSheetState extends State<MultiSelectBottomSheet> {
+class _ServiceSelectionUIState extends State<ServiceSelectionUI> {
   late List<ServiceModel> _tempSelected;
   final TextEditingController _searchController = TextEditingController();
   List<ServiceModel> _filteredItems = [];

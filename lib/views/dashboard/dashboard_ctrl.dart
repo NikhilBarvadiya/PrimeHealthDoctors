@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import 'package:prime_health_doctors/utils/config/session.dart';
+import 'package:prime_health_doctors/utils/storage.dart';
 
 class DashboardCtrl extends GetxController {
   var currentIndex = 0.obs;
@@ -28,31 +30,31 @@ class DashboardCtrl extends GetxController {
   //
   // var filteredPendingRequests = <RequestModel>[].obs;
   //
-  // var userName = ''.obs;
+  var userName = ''.obs;
   // var selectedStatus = ''.obs;
   // var selectedService = ''.obs;
   // var selectedDate = ''.obs;
   // var searchQuery = ''.obs;
   //
-  // @override
-  // void onInit() {
-  //   super.onInit();
-  //   filteredAppointments.assignAll(appointmentsList);
-  //   filteredPendingRequests.assignAll(pendingRequestsList);
-  //   loadUserData();
-  // }
-  //
-  // void loadUserData() async {
-  //   try {
-  //     final userData = await read(AppSession.userData);
-  //     if (userData != null) {
-  //       userName.value = userData['name'] ?? userData['clinic'] ?? "Dr. John Smith";
-  //     }
-  //   } catch (e) {
-  //     Get.snackbar('Error', 'Failed to load user data: $e', snackPosition: SnackPosition.BOTTOM);
-  //   }
-  // }
-  //
+  @override
+  void onInit() {
+    super.onInit();
+    // filteredAppointments.assignAll(appointmentsList);
+    // filteredPendingRequests.assignAll(pendingRequestsList);
+    loadUserData();
+  }
+
+  void loadUserData() async {
+    try {
+      final userData = await read(AppSession.userData);
+      if (userData != null) {
+        userName.value = userData['name'] ?? userData['clinic'] ?? "Dr. John Smith";
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to load user data: $e', snackPosition: SnackPosition.BOTTOM);
+    }
+  }
+
   void changeTab(int index) {
     currentIndex.value = index;
   }
