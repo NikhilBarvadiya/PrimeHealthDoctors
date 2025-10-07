@@ -85,6 +85,8 @@ class Register extends StatelessWidget {
       children: [
         _buildSectionHeader('Personal Information'),
         const SizedBox(height: 20),
+        _buildNameField(ctrl, context),
+        const SizedBox(height: 16),
         _buildEmailField(ctrl, context),
         const SizedBox(height: 16),
         _buildPasswordField(ctrl, context),
@@ -116,6 +118,44 @@ class Register extends StatelessWidget {
     return Text(
       text,
       style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+    );
+  }
+
+  Widget _buildNameField(RegisterCtrl ctrl, BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Doctor Name',
+          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: ctrl.clinicCtrl,
+          textInputAction: TextInputAction.next,
+          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: AppTheme.textPrimary),
+          decoration: InputDecoration(
+            hintText: 'Enter your name',
+            hintStyle: GoogleFonts.inter(color: AppTheme.textLight, fontWeight: FontWeight.w400),
+            prefixIcon: Icon(Icons.person_2_rounded, color: AppTheme.textSecondary, size: 22),
+            filled: true,
+            fillColor: AppTheme.backgroundWhite,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.transparent),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: AppTheme.borderColor),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: AppTheme.primaryBlue, width: 2),
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          ),
+        ),
+      ],
     );
   }
 

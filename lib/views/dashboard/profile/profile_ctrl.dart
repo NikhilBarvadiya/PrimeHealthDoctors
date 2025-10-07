@@ -21,6 +21,7 @@ class ProfileCtrl extends GetxController {
     referralCode: 'ABC',
     ownReferralCode: 'AAA',
     registrationDate: DateTime.now().toIso8601String(),
+    fcmToken: '',
   ).obs;
   bool isEditMode = false;
 
@@ -72,6 +73,7 @@ class ProfileCtrl extends GetxController {
         referralCode: userData["referralCode"] ?? 'ABC',
         ownReferralCode: userData["ownReferralCode"] ?? 'AAA',
         registrationDate: userData["registrationDate"] ?? DateTime.now().toIso8601String(),
+        fcmToken: '',
       );
       notificationRange.value = userData["notificationRange"] ?? 8;
       if (userData['availableDays'] != null) {
@@ -274,6 +276,7 @@ class ProfileCtrl extends GetxController {
         referralCode: user.value.referralCode,
         ownReferralCode: user.value.ownReferralCode,
         registrationDate: user.value.registrationDate,
+        fcmToken: user.value.fcmToken,
       );
       final request = {
         'name': name,
@@ -320,6 +323,7 @@ class ProfileCtrl extends GetxController {
         referralCode: '',
         ownReferralCode: '',
         registrationDate: '',
+        fcmToken: '',
       );
       update();
     } catch (e) {

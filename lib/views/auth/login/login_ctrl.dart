@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:prime_health_doctors/service/calling_service.dart';
 import 'package:prime_health_doctors/utils/config/session.dart';
 import 'package:prime_health_doctors/utils/routes/route_name.dart';
 import 'package:prime_health_doctors/utils/storage.dart';
@@ -27,7 +28,8 @@ class LoginCtrl extends GetxController {
     }
     isLoading.value = true;
     try {
-      final request = {'email': emailCtrl.text.trim(), 'password': passwordCtrl.text.trim(), 'ownReferralCode': _generateReferralCode()};
+      String? getToken = await CallingService().getToken();
+      final request = {'email': emailCtrl.text.trim(), 'password': passwordCtrl.text.trim(), 'fcmToken': getToken ?? "", 'ownReferralCode': _generateReferralCode()};
       await write(AppSession.token, DateTime.now().toIso8601String());
       await write(AppSession.userData, request);
       toaster.success("Welcome back...");

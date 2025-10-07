@@ -4,7 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:prime_health_doctors/models/appointment_model.dart';
 import 'package:prime_health_doctors/utils/decoration.dart';
+import 'package:prime_health_doctors/utils/theme/light.dart';
 import 'package:prime_health_doctors/views/dashboard/home/appointments/appointments.dart';
+import 'package:prime_health_doctors/views/dashboard/home/appointments/ui/appointment_details.dart';
 import 'package:prime_health_doctors/views/dashboard/home/home_ctrl.dart';
 
 class Home extends StatelessWidget {
@@ -75,22 +77,22 @@ class Home extends StatelessWidget {
   Widget _buildBannerSection() {
     final banners = [
       {
-        'image': 'https://images.pexels.com/photos/3825529/pexels-photo-3825529.jpeg?auto=compress&cs=tinysrgb&w=1080',
-        'title': 'Welcome to Our Clinic',
-        'subtitle': 'Where care meets expertise — your recovery starts here.',
-        'color': Colors.blue[700]!,
+        'image': 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
+        'title': 'Excellence in Healthcare',
+        'subtitle': 'Providing world-class medical care with compassion and expertise',
+        'gradient': [AppTheme.primaryBlue, AppTheme.primaryDark],
       },
       {
-        'image': 'https://images.pexels.com/photos/4506107/pexels-photo-4506107.jpeg?auto=compress&cs=tinysrgb&w=1080',
-        'title': 'Special Offer',
-        'subtitle': 'Enjoy 20% off your first physiotherapy session!',
-        'color': Colors.green[700]!,
+        'image': 'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2073&q=80',
+        'title': 'Advanced Medical Technology',
+        'subtitle': 'State-of-the-art equipment for accurate diagnosis and treatment',
+        'gradient': [AppTheme.accentTeal, AppTheme.accentGreen],
       },
       {
-        'image': 'https://images.pexels.com/photos/8376234/pexels-photo-8376234.jpeg?auto=compress&cs=tinysrgb&w=1080',
-        'title': 'New Services',
-        'subtitle': 'Now offering maternity & pediatric physiotherapy programs.',
-        'color': Colors.purple[700]!,
+        'image': 'https://images.unsplash.com/photo-1551601651-2a8555f1a136?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2032&q=80',
+        'title': 'Patient-Centered Care',
+        'subtitle': 'Your health and wellbeing are our top priorities',
+        'gradient': [Color(0xFF8B5CF6), Color(0xFF6366F1)],
       },
     ];
 
@@ -102,6 +104,7 @@ class Home extends StatelessWidget {
         controller: PageController(viewportFraction: 0.85),
         itemBuilder: (context, index) {
           final banner = banners[index];
+          final gradientColors = (banner['gradient'] as List<Color>);
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Card(
@@ -116,11 +119,15 @@ class Home extends StatelessWidget {
                       imageUrl: banner['image'].toString(),
                       fit: BoxFit.cover,
                       placeholder: (context, url) => Container(
-                        color: banner['color'] as Color,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(colors: gradientColors, begin: Alignment.topLeft, end: Alignment.bottomRight),
+                        ),
                         child: const Center(child: CircularProgressIndicator(color: Colors.white)),
                       ),
                       errorWidget: (context, url, error) => Container(
-                        color: banner['color'] as Color,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(colors: gradientColors, begin: Alignment.topLeft, end: Alignment.bottomRight),
+                        ),
                         child: const Icon(Icons.error, color: Colors.white, size: 40),
                       ),
                     ),
@@ -174,7 +181,7 @@ class Home extends StatelessWidget {
 
   Widget _buildAppointmentsSection(HomeCtrl ctrl) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.only(left: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -198,7 +205,7 @@ class Home extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           Obx(
             () => ctrl.filteredAppointments.isEmpty
                 ? _buildEmptyState(icon: Icons.calendar_today_outlined, title: 'No Appointments', subtitle: 'No appointments scheduled for today')
@@ -213,7 +220,7 @@ class Home extends StatelessWidget {
                         return _buildAppointmentCard(appointment);
                       },
                     ),
-                  ),
+                  ).paddingOnly(right: 20),
           ),
         ],
       ),
@@ -229,51 +236,58 @@ class Home extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [BoxShadow(color: Colors.white.withOpacity(0.08), blurRadius: 12, offset: const Offset(0, 4))],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => Get.to(() => AppointmentDetails(appointment: appointment)),
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircleAvatar(
-                  backgroundColor: decoration.colorScheme.primary.withOpacity(0.1),
-                  child: Icon(Icons.person, color: decoration.colorScheme.primary, size: 20),
+                Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: decoration.colorScheme.primary.withOpacity(0.1),
+                      child: Icon(Icons.person, color: decoration.colorScheme.primary, size: 20),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        appointment.patientName,
+                        style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    appointment.patientName,
-                    style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [_buildInfoRow(Icons.calendar_today_outlined, appointment.date), _buildInfoRow(Icons.access_time_outlined, appointment.time)],
+                ),
+                const SizedBox(height: 6),
+                _buildInfoRow(Icons.medical_services_outlined, appointment.service),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(color: statusColor.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                      child: Text(
+                        appointment.status.capitalizeFirst.toString(),
+                        style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500, color: statusColor),
+                      ),
+                    ),
+                    const Spacer(),
+                    Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [_buildInfoRow(Icons.calendar_today_outlined, appointment.date), _buildInfoRow(Icons.access_time_outlined, appointment.time)],
-            ),
-            const SizedBox(height: 6),
-            _buildInfoRow(Icons.medical_services_outlined, appointment.service),
-            const SizedBox(height: 6),
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(color: statusColor.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-                  child: Text(
-                    appointment.status.capitalizeFirst.toString(),
-                    style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500, color: statusColor),
-                  ),
-                ),
-                const Spacer(),
-                Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
     );

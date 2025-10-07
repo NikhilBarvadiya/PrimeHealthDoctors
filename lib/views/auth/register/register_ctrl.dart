@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:prime_health_doctors/models/service_model.dart';
+import 'package:prime_health_doctors/service/calling_service.dart';
 import 'package:prime_health_doctors/utils/config/session.dart';
 import 'package:prime_health_doctors/utils/routes/route_name.dart';
 import 'package:prime_health_doctors/utils/storage.dart';
 import 'package:prime_health_doctors/utils/toaster.dart';
 
 class RegisterCtrl extends GetxController {
+  final nameCtrl = TextEditingController();
   final emailCtrl = TextEditingController();
   final passwordCtrl = TextEditingController();
   final mobileCtrl = TextEditingController();
@@ -36,6 +38,9 @@ class RegisterCtrl extends GetxController {
   void clearReferralCode() => referralCodeCtrl.clear();
 
   Future<void> register() async {
+    if (nameCtrl.text.isEmpty) {
+      return toaster.warning('Please enter your name');
+    }
     if (emailCtrl.text.isEmpty) {
       return toaster.warning('Please enter your email');
     }
@@ -65,7 +70,9 @@ class RegisterCtrl extends GetxController {
     }
     isLoading.value = true;
     try {
+      String? getToken = await CallingService().getToken();
       final request = {
+        'name': nameCtrl.text.trim(),
         'email': emailCtrl.text.trim(),
         'password': passwordCtrl.text.trim(),
         'mobile': mobileCtrl.text.trim(),
@@ -74,6 +81,7 @@ class RegisterCtrl extends GetxController {
         'services': selectedServices.map((e) => e.name).toList(),
         'referralCode': referralCodeCtrl.text.trim().isNotEmpty ? referralCodeCtrl.text.trim() : null,
         'ownReferralCode': _generateReferralCode(),
+        'fcmToken': getToken ?? "",
         'registrationDate': DateTime.now().toIso8601String(),
       };
       await write(AppSession.token, DateTime.now().toIso8601String());

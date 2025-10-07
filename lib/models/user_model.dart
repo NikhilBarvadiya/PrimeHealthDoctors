@@ -11,6 +11,8 @@ class UserModel {
   final String referralCode;
   final String ownReferralCode;
   final String registrationDate;
+  final String fcmToken;
+
 
   UserModel({
     required this.id,
@@ -25,5 +27,6 @@ class UserModel {
     required this.referralCode,
     required this.ownReferralCode,
     required this.registrationDate,
+    required this.fcmToken,
   });
 }
