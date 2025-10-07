@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:prime_health_doctors/utils/decoration.dart';
 import 'package:prime_health_doctors/views/dashboard/profile/profile.dart';
+import 'package:prime_health_doctors/views/dashboard/services/services.dart';
 import 'dashboard_ctrl.dart';
 
 class Dashboard extends StatelessWidget {
@@ -16,7 +17,7 @@ class Dashboard extends StatelessWidget {
           canPop: false,
           child: Obx(
             () => Scaffold(
-              body: IndexedStack(index: ctrl.currentIndex.value, children: [Container(), Container(), Profile()]),
+              body: IndexedStack(index: ctrl.currentIndex.value, children: [Container(), Services(), Profile()]),
               // body: IndexedStack(index: ctrl.currentIndex.value, children: [Home(), Services(), Profile()]),
               bottomNavigationBar: Container(
                 decoration: BoxDecoration(
