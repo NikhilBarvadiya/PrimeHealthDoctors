@@ -145,10 +145,10 @@ class Home extends StatelessWidget {
                         children: [
                           Text(
                             banner['title'].toString(),
-                            style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                            style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                           ),
                           const SizedBox(height: 4),
-                          Text(banner['subtitle'].toString(), style: GoogleFonts.poppins(fontSize: 14, color: Colors.white.withOpacity(0.9))),
+                          Text(banner['subtitle'].toString(), style: GoogleFonts.poppins(fontSize: 12, color: Colors.white.withOpacity(0.9))),
                         ],
                       ),
                     ),
