@@ -5,7 +5,7 @@ import 'package:prime_health_doctors/models/user_model.dart';
 import 'package:prime_health_doctors/utils/config/session.dart';
 import 'package:prime_health_doctors/utils/helper.dart';
 import 'package:prime_health_doctors/utils/storage.dart';
-import 'package:prime_health_doctors/views/dashboard/dashboard_ctrl.dart';
+import 'package:prime_health_doctors/views/dashboard/home/home_ctrl.dart';
 
 class ProfileCtrl extends GetxController {
   var user = UserModel(
@@ -287,7 +287,7 @@ class ProfileCtrl extends GetxController {
       };
       await write(AppSession.token, DateTime.now().toIso8601String());
       await write(AppSession.userData, request);
-      final ctrl = Get.find<DashboardCtrl>();
+      final ctrl = Get.find<HomeCtrl>();
       ctrl.loadUserData();
       update();
     } catch (e) {
