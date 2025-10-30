@@ -5,188 +5,85 @@ import 'package:prime_health_doctors/models/user_model.dart';
 import 'package:prime_health_doctors/utils/config/session.dart';
 import 'package:prime_health_doctors/utils/helper.dart';
 import 'package:prime_health_doctors/utils/storage.dart';
+import 'package:prime_health_doctors/utils/toaster.dart';
+import 'package:prime_health_doctors/views/auth/auth_service.dart';
 import 'package:prime_health_doctors/views/dashboard/home/home_ctrl.dart';
 
 class ProfileCtrl extends GetxController {
-  var user = UserModel(
-    id: '1',
-    name: 'Dr. John Smith',
-    email: 'john.smith@example.com',
-    mobile: '+91 98765 43210',
-    password: '********',
-    specialty: 'Orthopedic Physiotherapy',
-    experienceYears: 10,
-    clinicName: 'Smith Physiotherapy Clinic',
-    clinicAddress: '123, Palm Street, Adajan, Surat, Gujarat, 395009',
-    referralCode: 'ABC',
-    ownReferralCode: 'AAA',
-    registrationDate: DateTime.now().toIso8601String(),
-    fcmToken: '',
-  ).obs;
+  var user = UserModel().obs;
+  var isLoading = false.obs;
   bool isEditMode = false;
-
-  var notificationRange = 8.obs;
-  var notificationsEnabled = false.obs;
-  var availableDays = <String>[].obs;
-  var daySchedules = <String, List<Map<String, TimeOfDay>>>{}.obs;
 
   var avatar = Rx<File?>(null);
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController mobileController = TextEditingController();
+  final TextEditingController licenseController = TextEditingController();
   final TextEditingController specialtyController = TextEditingController();
-  final TextEditingController experienceController = TextEditingController();
-  final TextEditingController clinicNameController = TextEditingController();
-  final TextEditingController clinicAddressController = TextEditingController();
+  final TextEditingController bioController = TextEditingController();
 
-  final weekDays = [
-    {'name': 'Monday', 'key': 'mon'},
-    {'name': 'Tuesday', 'key': 'tue'},
-    {'name': 'Wednesday', 'key': 'wed'},
-    {'name': 'Thursday', 'key': 'thu'},
-    {'name': 'Friday', 'key': 'fri'},
-    {'name': 'Saturday', 'key': 'sat'},
-    {'name': 'Sunday', 'key': 'sun'},
-  ];
+  AuthService get authService => Get.find<AuthService>();
 
   @override
   void onInit() {
-    _loadUserData();
-    _initializeAvailability();
+    loadUserData();
     super.onInit();
   }
 
-  Future<void> _loadUserData() async {
-    final userData = await read(AppSession.userData);
-    if (userData != null) {
-      user.value = UserModel(
-        id: "1",
-        name: userData["name"] ?? 'Dr. John Smith',
-        email: userData["email"] ?? 'john.smith@example.com',
-        mobile: userData["mobile"] ?? '+91 98765 43210',
-        password: userData["password"] ?? '********',
-        specialty: userData["specialty"] ?? 'Orthopedic Physiotherapy',
-        experienceYears: userData["experienceYears"] ?? 5,
-        clinicName: userData["clinic"] ?? "PrimeHealth Clinic",
-        clinicAddress: userData["clinicAddress"] ?? '123, Medical Street, City, State, 395009',
-        referralCode: userData["referralCode"] ?? 'ABC',
-        ownReferralCode: userData["ownReferralCode"] ?? 'AAA',
-        registrationDate: userData["registrationDate"] ?? DateTime.now().toIso8601String(),
-        fcmToken: '',
-      );
-      notificationRange.value = userData["notificationRange"] ?? 8;
-      if (userData['availableDays'] != null) {
-        availableDays.assignAll(List<String>.from(userData['availableDays']));
+  Future<void> loadUserData() async {
+    isLoading.value = true;
+    try {
+      final profileData = await authService.getProfile();
+      if (profileData != null && profileData['doctor'] != null) {
+        final data = await authService.getSpecialities();
+        if (data.isNotEmpty) {
+          int index = data.indexWhere((e) => e["_id"].toString() == profileData['doctor']['specialty'].toString());
+          if (index != -1) {
+            profileData["doctor"]["specialty"] = data[index]["name"];
+          }
+        }
+        _updateUserFromApi(profileData['doctor']);
       }
-      if (userData['daySchedules'] != null) {
-        final schedulesMap = userData['daySchedules'] as Map<String, dynamic>;
-        schedulesMap.forEach((day, slots) {
-          daySchedules[day] = (slots as List).map((slot) {
-            final startParts = (slot['start'] as String).split(':');
-            final endParts = (slot['end'] as String).split(':');
-            return {'start': TimeOfDay(hour: int.parse(startParts[0]), minute: int.parse(startParts[1])), 'end': TimeOfDay(hour: int.parse(endParts[0]), minute: int.parse(endParts[1]))};
-          }).toList();
-        });
-      }
+      _updateControllers();
+    } catch (e) {
+      toaster.error('Failed to load profile: $e');
+    } finally {
+      isLoading.value = false;
     }
+  }
+
+  void _updateUserFromApi(Map<String, dynamic> data) {
+    user.value = UserModel(
+      id: data['_id']?.toString() ?? '',
+      name: data['name'] ?? '',
+      email: data['email'] ?? '',
+      mobile: data['mobileNo'] ?? '',
+      license: data['license'] ?? '',
+      specialty: data['specialty']?.toString() ?? '',
+      bio: data['bio'] ?? '',
+      profileImage: data['profileImage'] ?? '',
+      pricing: data['pricing'] != null ? Pricing.fromJson(data['pricing']) : Pricing(),
+      certifications: data['certifications'] != null ? List<Certification>.from(data['certifications'].map((x) => Certification.fromJson(x))) : [],
+      isActive: data['isActive'] ?? true,
+      createdAt: data['createdAt'] != null ? DateTime.parse(data['createdAt']) : DateTime.now(),
+    );
+    write(AppSession.userData, data);
+  }
+
+  void _updateControllers() {
     nameController.text = user.value.name;
     emailController.text = user.value.email;
     mobileController.text = user.value.mobile;
+    licenseController.text = user.value.license;
     specialtyController.text = user.value.specialty;
-    experienceController.text = user.value.experienceYears.toString();
-    clinicNameController.text = user.value.clinicName;
-    clinicAddressController.text = user.value.clinicAddress;
-  }
-
-  void _initializeAvailability() {
-    if (availableDays.isEmpty) {
-      availableDays.addAll(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']);
-    }
-    for (final day in weekDays) {
-      if (!daySchedules.containsKey(day['name']!)) {
-        daySchedules[day['name']!] = [
-          {'start': const TimeOfDay(hour: 9, minute: 0), 'end': const TimeOfDay(hour: 17, minute: 0)},
-        ];
-      }
-    }
-  }
-
-  void setNotificationRange(int range) {
-    notificationRange.value = range;
-  }
-
-  Future<void> saveNotificationRange() async {
-    final userData = await read(AppSession.userData) ?? {};
-    userData['notificationRange'] = notificationRange.value;
-    await write(AppSession.userData, userData);
-  }
-
-  Future<void> saveAvailability() async {
-    final userData = await read(AppSession.userData) ?? {};
-    userData['availableDays'] = availableDays.toList();
-    final schedulesMap = <String, dynamic>{};
-    daySchedules.forEach((day, slots) {
-      schedulesMap[day] = slots.map((slot) => {'start': '${slot['start']!.hour}:${slot['start']!.minute}', 'end': '${slot['end']!.hour}:${slot['end']!.minute}'}).toList();
-    });
-    userData['daySchedules'] = schedulesMap;
-    await write(AppSession.userData, userData);
-  }
-
-  void toggleDayAvailability(String day, bool isAvailable) {
-    if (isAvailable) {
-      availableDays.add(day);
-    } else {
-      availableDays.remove(day);
-    }
-    saveAvailability();
-    update();
-  }
-
-  List<Map<String, TimeOfDay>> getTimeSlotsForDay(String day) {
-    return daySchedules[day] ?? [];
-  }
-
-  void addTimeSlot(String day) {
-    if (daySchedules[day] == null) {
-      daySchedules[day] = [];
-    }
-    final lastSlot = daySchedules[day]!.isNotEmpty ? daySchedules[day]!.last : null;
-    final startTime = lastSlot != null ? _addMinutes(lastSlot['end']!, 5) : const TimeOfDay(hour: 9, minute: 0);
-    final endTime = _addMinutes(startTime, 60);
-    final updatedSlots = List<Map<String, TimeOfDay>>.from(daySchedules[day]!)..add({'start': startTime, 'end': endTime});
-    daySchedules[day] = updatedSlots;
-    saveAvailability();
-  }
-
-  void updateSlotTime(String day, int slotIndex, String type, TimeOfDay time) {
-    if (daySchedules[day] != null && slotIndex < daySchedules[day]!.length) {
-      final updatedSlots = List<Map<String, TimeOfDay>>.from(daySchedules[day]!);
-      updatedSlots[slotIndex][type] = time;
-      daySchedules[day] = updatedSlots;
-      saveAvailability();
-    }
-  }
-
-  void removeTimeSlot(String day, int slotIndex) {
-    if (daySchedules[day] != null && daySchedules[day]!.length > 1) {
-      final updatedSlots = List<Map<String, TimeOfDay>>.from(daySchedules[day]!)..removeAt(slotIndex);
-      daySchedules[day] = updatedSlots;
-      saveAvailability();
-    }
-  }
-
-  TimeOfDay _addMinutes(TimeOfDay time, int minutes) {
-    int totalMinutes = time.hour * 60 + time.minute + minutes;
-    int newHour = (totalMinutes ~/ 60) % 24;
-    int newMinute = totalMinutes % 60;
-    return TimeOfDay(hour: newHour, minute: newMinute);
+    bioController.text = user.value.bio;
   }
 
   void toggleEditMode() {
     isEditMode = !isEditMode;
     if (!isEditMode) {
-      _loadUserData();
+      loadUserData();
     }
     update();
   }
@@ -198,136 +95,60 @@ class ProfileCtrl extends GetxController {
     }
   }
 
-  void saveProfile() {
+  Future<void> saveProfile() async {
     if (_validateForm()) {
-      updateProfile(
-        name: nameController.text,
-        email: emailController.text,
-        mobile: mobileController.text,
-        specialty: specialtyController.text,
-        experienceYears: int.parse(experienceController.text),
-        clinicName: clinicNameController.text,
-        clinicAddress: clinicAddressController.text,
-      );
-      isEditMode = false;
-      update();
-      Get.snackbar(
-        'Success',
-        'Profile updated successfully',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-        margin: const EdgeInsets.all(15),
-        borderRadius: 12,
-      );
+      isLoading.value = true;
+      try {
+        final request = {
+          "name": nameController.text.trim(),
+          "email": emailController.text.trim(),
+          "mobileNo": mobileController.text.trim(),
+          "license": licenseController.text.trim(),
+          "specialty": user.value.specialty,
+          "bio": bioController.text.trim(),
+          "pricing": {"consultationFee": user.value.pricing.consultationFee, "followUpFee": user.value.pricing.followUpFee},
+        };
+
+        final success = await authService.updateProfile(request);
+        if (success) {
+          await loadUserData();
+          isEditMode = false;
+          update();
+          final homeCtrl = Get.find<HomeCtrl>();
+          homeCtrl.loadUserData();
+          toaster.success('Profile updated successfully');
+        }
+      } catch (e) {
+        toaster.error('Failed to update profile: $e');
+      } finally {
+        isLoading.value = false;
+      }
     }
   }
 
   bool _validateForm() {
-    if (nameController.text.isEmpty ||
-        emailController.text.isEmpty ||
-        mobileController.text.isEmpty ||
-        specialtyController.text.isEmpty ||
-        experienceController.text.isEmpty ||
-        clinicNameController.text.isEmpty ||
-        clinicAddressController.text.isEmpty) {
-      Get.snackbar('Error', 'Please fill all fields', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.red, colorText: Colors.white);
+    if (nameController.text.isEmpty || emailController.text.isEmpty || mobileController.text.isEmpty || licenseController.text.isEmpty || specialtyController.text.isEmpty) {
+      toaster.warning('Please fill all required fields');
       return false;
     }
-
-    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(emailController.text)) {
-      Get.snackbar('Error', 'Invalid email format', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.red, colorText: Colors.white);
+    if (!GetUtils.isEmail(emailController.text)) {
+      toaster.warning('Invalid email format');
       return false;
     }
-
-    if (!RegExp(r'^\+?[\d\s-]{10,}$').hasMatch(mobileController.text)) {
-      Get.snackbar('Error', 'Invalid mobile number', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.red, colorText: Colors.white);
-      return false;
-    }
-
-    if (int.tryParse(experienceController.text) == null) {
-      Get.snackbar('Error', 'Enter a valid number for experience', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.red, colorText: Colors.white);
+    if (!GetUtils.isPhoneNumber(mobileController.text)) {
+      toaster.warning('Invalid mobile number');
       return false;
     }
 
     return true;
   }
 
-  void updateProfile({
-    required String name,
-    required String email,
-    required String mobile,
-    required String specialty,
-    required int experienceYears,
-    required String clinicName,
-    required String clinicAddress,
-  }) async {
-    try {
-      user.value = UserModel(
-        id: user.value.id,
-        name: name,
-        email: email,
-        mobile: mobile,
-        password: user.value.password,
-        specialty: specialty,
-        experienceYears: experienceYears,
-        clinicName: clinicName,
-        clinicAddress: clinicAddress,
-        referralCode: user.value.referralCode,
-        ownReferralCode: user.value.ownReferralCode,
-        registrationDate: user.value.registrationDate,
-        fcmToken: user.value.fcmToken,
-      );
-      final request = {
-        'name': name,
-        'email': email,
-        'password': user.value.password,
-        'mobile': mobile,
-        'specialty': specialty,
-        'experienceYears': experienceYears,
-        'clinicName': clinicName,
-        'clinicAddress': clinicAddress,
-      };
-      await write(AppSession.token, DateTime.now().toIso8601String());
-      await write(AppSession.userData, request);
-      final ctrl = Get.find<HomeCtrl>();
-      ctrl.loadUserData();
-      update();
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to update profile: $e', snackPosition: SnackPosition.BOTTOM);
-    }
-  }
-
-  void logout() async {
+  Future<void> logout() async {
     try {
       await clearStorage();
-      update();
+      Get.offAllNamed('/login');
     } catch (e) {
-      Get.snackbar('Error', 'Failed to logout: $e', snackPosition: SnackPosition.BOTTOM);
-    }
-  }
-
-  void deleteAccount() async {
-    try {
-      await clearStorage();
-      user.value = UserModel(
-        id: '',
-        name: '',
-        email: '',
-        mobile: '',
-        password: '',
-        specialty: '',
-        experienceYears: 0,
-        clinicName: '',
-        clinicAddress: '',
-        referralCode: '',
-        ownReferralCode: '',
-        registrationDate: '',
-        fcmToken: '',
-      );
-      update();
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to delete account: $e', snackPosition: SnackPosition.BOTTOM);
+      toaster.error('Failed to logout: $e');
     }
   }
 }

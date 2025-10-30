@@ -1,19 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:prime_health_doctors/models/user_model.dart';
 import 'package:prime_health_doctors/utils/theme/light.dart';
-import 'package:prime_health_doctors/views/auth/register/ui/settings_ui.dart';
 import 'package:prime_health_doctors/views/dashboard/profile/profile_ctrl.dart';
-import 'package:prime_health_doctors/views/dashboard/profile/ui/availability_settings.dart';
 
-class Profile extends StatefulWidget {
+class Profile extends StatelessWidget {
   const Profile({super.key});
 
-  @override
-  State<Profile> createState() => _ProfileState();
-}
-
-class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ProfileCtrl>(
@@ -21,72 +15,68 @@ class _ProfileState extends State<Profile> {
       builder: (ctrl) {
         return Scaffold(
           backgroundColor: AppTheme.backgroundLight,
-          body: CustomScrollView(
-            slivers: [
-              SliverAppBar(
-                elevation: 0,
-                backgroundColor: AppTheme.backgroundWhite,
-                pinned: true,
-                floating: true,
-                automaticallyImplyLeading: false,
-                title: Text(
-                  'My Profile',
-                  style: GoogleFonts.inter(fontSize: 24, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
-                ),
-                actions: [
-                  if (ctrl.isEditMode)
-                    IconButton(
-                      style: IconButton.styleFrom(
-                        backgroundColor: AppTheme.primaryBlue,
-                        padding: const EdgeInsets.all(8),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      icon: Icon(Icons.save_rounded, color: Colors.white, size: 20),
-                      onPressed: ctrl.saveProfile,
+          body: RefreshIndicator(
+            onRefresh: () async => await ctrl.loadUserData(),
+            child: Obx(() {
+              return CustomScrollView(
+                slivers: [
+                  SliverAppBar(
+                    elevation: 0,
+                    backgroundColor: AppTheme.backgroundWhite,
+                    pinned: true,
+                    floating: true,
+                    automaticallyImplyLeading: false,
+                    title: Text(
+                      'My Profile',
+                      style: GoogleFonts.inter(fontSize: 24, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
                     ),
-                  if (!ctrl.isEditMode)
-                    IconButton(
-                      style: ButtonStyle(
-                        shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                        padding: WidgetStatePropertyAll(const EdgeInsets.all(8)),
-                        backgroundColor: WidgetStatePropertyAll(Colors.grey[100]),
+                    actions: [
+                      if (ctrl.isEditMode)
+                        IconButton(
+                          style: IconButton.styleFrom(
+                            backgroundColor: AppTheme.primaryBlue,
+                            padding: const EdgeInsets.all(8),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          icon: Icon(Icons.save_rounded, color: Colors.white, size: 20),
+                          onPressed: ctrl.saveProfile,
+                        ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: IconButton(
+                          style: IconButton.styleFrom(
+                            backgroundColor: AppTheme.backgroundLight,
+                            padding: const EdgeInsets.all(8),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          icon: Icon(ctrl.isEditMode ? Icons.close_rounded : Icons.edit_rounded, color: ctrl.isEditMode ? AppTheme.emergencyRed : AppTheme.primaryBlue, size: 20),
+                          onPressed: ctrl.toggleEditMode,
+                          tooltip: ctrl.isEditMode ? 'Cancel Edit' : 'Edit Profile',
+                        ),
                       ),
-                      icon: Icon(Icons.settings_outlined, color: AppTheme.primaryLight, size: 20),
-                      onPressed: () => Get.to(() => const Settings()),
-                      tooltip: 'Settings',
-                    ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: IconButton(
-                      style: IconButton.styleFrom(
-                        backgroundColor: AppTheme.backgroundLight,
-                        padding: const EdgeInsets.all(8),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ],
+                  ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          _buildProfileHeader(ctrl),
+                          const SizedBox(height: 24),
+                          _buildPersonalInfoSection(ctrl),
+                          const SizedBox(height: 24),
+                          _buildProfessionalInfoSection(ctrl),
+                          const SizedBox(height: 24),
+                          _buildPricingSection(ctrl),
+
+                          if (ctrl.user.value.certifications.isNotEmpty) ...[const SizedBox(height: 24), _buildCertificationsSection(ctrl)],
+                        ],
                       ),
-                      icon: Icon(ctrl.isEditMode ? Icons.close_rounded : Icons.edit_rounded, color: ctrl.isEditMode ? AppTheme.emergencyRed : AppTheme.primaryBlue, size: 20),
-                      onPressed: ctrl.toggleEditMode,
-                      tooltip: ctrl.isEditMode ? 'Cancel Edit' : 'Edit Profile',
                     ),
                   ),
                 ],
-              ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      _buildProfileHeader(ctrl),
-                      const SizedBox(height: 24),
-                      _buildPersonalInfoSection(ctrl),
-                      const SizedBox(height: 24),
-                      _buildProfessionalInfoSection(ctrl),
-                      const SizedBox(height: 24),
-                      _buildAvailabilitySection(ctrl),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+              );
+            }),
           ),
         );
       },
@@ -108,6 +98,7 @@ class _ProfileState extends State<Profile> {
             child: Stack(
               children: [
                 Obx(() {
+                  final hasProfileImage = ctrl.user.value.profileImage.isNotEmpty;
                   return Container(
                     width: 80,
                     height: 80,
@@ -115,9 +106,11 @@ class _ProfileState extends State<Profile> {
                       color: Colors.white.withOpacity(0.2),
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
-                      image: ctrl.avatar.value != null && ctrl.avatar.value!.path.isNotEmpty ? DecorationImage(image: FileImage(ctrl.avatar.value!), fit: BoxFit.cover) : null,
+                      image: hasProfileImage
+                          ? DecorationImage(image: NetworkImage(ctrl.user.value.profileImage), fit: BoxFit.cover)
+                          : (ctrl.avatar.value != null ? DecorationImage(image: FileImage(ctrl.avatar.value!), fit: BoxFit.cover) : null),
                     ),
-                    child: ctrl.avatar.value == null || ctrl.avatar.value!.path.isEmpty ? Icon(Icons.person_rounded, size: 40, color: Colors.white) : null,
+                    child: !hasProfileImage && ctrl.avatar.value == null ? Icon(Icons.person_rounded, size: 40, color: Colors.white) : null,
                   );
                 }),
                 if (ctrl.isEditMode)
@@ -152,7 +145,6 @@ class _ProfileState extends State<Profile> {
                   _buildEditTextField(ctrl.emailController, 'Email Address', isEmail: true)
                 else
                   Obx(() => Text(ctrl.user.value.email, style: GoogleFonts.inter(fontSize: 12, color: Colors.white.withOpacity(0.9)))),
-                const SizedBox(height: 8),
               ],
             ),
           ),
@@ -188,12 +180,12 @@ class _ProfileState extends State<Profile> {
             _buildEditField('Full Name', ctrl.nameController, Icons.person_2_rounded),
             _buildEditField('Email Address', ctrl.emailController, Icons.email_rounded, isEmail: true),
             _buildEditField('Mobile Number', ctrl.mobileController, Icons.phone_rounded, isPhone: true),
-            _buildEditField('Specialty', ctrl.specialtyController, Icons.medical_services_rounded),
-            _buildEditField('Experience (Years)', ctrl.experienceController, Icons.work_history_rounded, isNumber: true),
+            _buildEditField('License Number', ctrl.licenseController, Icons.badge_rounded),
+            _buildEditField('Specialty ID', ctrl.specialtyController, Icons.medical_services_rounded, readOnly: true),
           ] else ...[
             _buildInfoTile(Icons.phone_rounded, 'Mobile', ctrl.user.value.mobile),
+            _buildInfoTile(Icons.badge_rounded, 'License', ctrl.user.value.license),
             _buildInfoTile(Icons.medical_services_rounded, 'Specialty', ctrl.user.value.specialty),
-            _buildInfoTile(Icons.work_history_rounded, 'Experience', '${ctrl.user.value.experienceYears} Years'),
           ],
         ],
       ),
@@ -214,28 +206,27 @@ class _ProfileState extends State<Profile> {
             padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 6),
             child: Row(
               children: [
-                Icon(Icons.business_center_rounded, color: AppTheme.primaryBlue, size: 20),
+                Icon(Icons.description_rounded, color: AppTheme.primaryBlue, size: 20),
                 const SizedBox(width: 8),
                 Text(
-                  'Professional Information',
+                  'Professional Bio',
                   style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
                 ),
               ],
             ),
           ),
-          if (ctrl.isEditMode) ...[
-            _buildEditField('Clinic Name', ctrl.clinicNameController, Icons.business_rounded),
-            _buildEditField('Clinic Address', ctrl.clinicAddressController, Icons.location_on_rounded, maxLines: 2),
-          ] else ...[
-            _buildInfoTile(Icons.business_rounded, 'Clinic Name', ctrl.user.value.clinicName),
-            _buildInfoTile(Icons.location_on_rounded, 'Clinic Address', ctrl.user.value.clinicAddress),
-          ],
+          if (ctrl.isEditMode)
+            _buildEditField('Bio', ctrl.bioController, Icons.description_rounded, maxLines: 3)
+          else if (ctrl.user.value.bio.isNotEmpty)
+            _buildInfoTile(Icons.description_rounded, 'Bio', ctrl.user.value.bio)
+          else
+            _buildEmptyState('No bio added yet', Icons.info_outline_rounded),
         ],
       ),
     );
   }
 
-  Widget _buildAvailabilitySection(ProfileCtrl ctrl) {
+  Widget _buildPricingSection(ProfileCtrl ctrl) {
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.backgroundWhite,
@@ -249,70 +240,75 @@ class _ProfileState extends State<Profile> {
             padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 6),
             child: Row(
               children: [
-                Icon(Icons.calendar_today_rounded, color: AppTheme.primaryBlue, size: 20),
+                Icon(Icons.attach_money_rounded, color: AppTheme.primaryBlue, size: 20),
                 const SizedBox(width: 8),
                 Text(
-                  'Clinic Availability',
+                  'Pricing',
                   style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
                 ),
               ],
             ),
           ),
+          _buildInfoTile(Icons.money_rounded, 'Consultation Fee', '₹${ctrl.user.value.pricing.consultationFee}'),
+          _buildInfoTile(Icons.currency_rupee_rounded, 'Follow-up Fee', '₹${ctrl.user.value.pricing.followUpFee}'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCertificationsSection(ProfileCtrl ctrl) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.backgroundWhite,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 15, offset: const Offset(0, 5))],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 6),
+            child: Row(
+              children: [
+                Icon(Icons.workspace_premium_rounded, color: AppTheme.primaryBlue, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  'Certifications',
+                  style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                ),
+              ],
+            ),
+          ),
+          ...ctrl.user.value.certifications.map((cert) => _buildCertificationTile(cert)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCertificationTile(Certification cert) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(color: AppTheme.accentGreen.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+            child: Icon(Icons.verified_rounded, color: AppTheme.accentGreen, size: 20),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Working Days',
-                            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
-                          ),
-                          const SizedBox(height: 4),
-                          Obx(() {
-                            final availableDays = ctrl.availableDays;
-                            return Text('${availableDays.length} days selected', style: GoogleFonts.inter(fontSize: 13, color: AppTheme.textSecondary));
-                          }),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () => Get.to(() => const AvailabilitySettings()),
-                      style: IconButton.styleFrom(
-                        backgroundColor: AppTheme.primaryBlue.withOpacity(0.1),
-                        padding: const EdgeInsets.all(12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      icon: Icon(Icons.arrow_forward_rounded, color: AppTheme.primaryBlue, size: 20),
-                    ),
-                  ],
+                Text(
+                  cert.name,
+                  style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
                 ),
-                const SizedBox(height: 12),
-                Obx(() {
-                  final availableDays = ctrl.availableDays;
-                  if (availableDays.isEmpty) {
-                    return _buildEmptyAvailabilityState();
-                  }
-                  return Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: availableDays.take(4).map((day) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(color: AppTheme.accentGreen.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
-                        child: Text(
-                          day.substring(0, 3),
-                          style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w500, color: AppTheme.accentGreen),
-                        ),
-                      );
-                    }).toList(),
-                  );
-                }),
+                const SizedBox(height: 4),
+                Text('Issued by: ${cert.issuedBy}', style: GoogleFonts.inter(fontSize: 13, color: AppTheme.textSecondary)),
+                const SizedBox(height: 2),
+                Text('Date: ${cert.issueDate.day}/${cert.issueDate.month}/${cert.issueDate.year}', style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textLight)),
               ],
             ),
           ),
@@ -354,7 +350,7 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  Widget _buildEditField(String label, TextEditingController controller, IconData icon, {bool isPhone = false, bool isNumber = false, bool isEmail = false, int maxLines = 1}) {
+  Widget _buildEditField(String label, TextEditingController controller, IconData icon, {bool isPhone = false, bool isEmail = false, int maxLines = 1, bool readOnly = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Row(
@@ -377,10 +373,9 @@ class _ProfileState extends State<Profile> {
                 const SizedBox(height: 6),
                 TextField(
                   controller: controller,
+                  readOnly: readOnly,
                   keyboardType: isPhone
                       ? TextInputType.phone
-                      : isNumber
-                      ? TextInputType.number
                       : isEmail
                       ? TextInputType.emailAddress
                       : TextInputType.text,
@@ -408,47 +403,36 @@ class _ProfileState extends State<Profile> {
 
   Widget _buildEditTextField(TextEditingController controller, String hintText, {bool isEmail = false}) {
     return TextField(
-      readOnly: true,
       controller: controller,
       keyboardType: isEmail ? TextInputType.emailAddress : TextInputType.text,
-      style: GoogleFonts.inter(color: Colors.black, fontWeight: FontWeight.w500, fontSize: 12),
+      style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w500, fontSize: 14),
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: GoogleFonts.inter(color: Colors.black.withOpacity(0.7), fontSize: 12),
+        hintStyle: GoogleFonts.inter(color: Colors.white.withOpacity(0.7), fontSize: 14),
         border: InputBorder.none,
-        contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
+        contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
         isDense: true,
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.white.withOpacity(0.5), width: 2),
-        ),
       ),
     );
   }
 
-  Widget _buildEmptyAvailabilityState() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppTheme.backgroundLight,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.borderColor),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.calendar_today_outlined, size: 20, color: AppTheme.textLight),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text('No availability set', style: GoogleFonts.inter(fontSize: 14, color: AppTheme.textSecondary)),
-          ),
-          TextButton(
-            onPressed: () => Get.to(() => const AvailabilitySettings()),
-            child: Text(
-              'Set Now',
-              style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.primaryBlue),
-            ),
-          ),
-        ],
+  Widget _buildEmptyState(String message, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppTheme.backgroundLight,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppTheme.borderColor, style: BorderStyle.solid),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 20, color: AppTheme.textLight),
+            const SizedBox(width: 12),
+            Text(message, style: GoogleFonts.inter(fontSize: 14, color: AppTheme.textSecondary)),
+          ],
+        ),
       ),
     );
   }

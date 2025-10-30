@@ -472,18 +472,13 @@ class AppointmentDetails extends StatelessWidget {
         name: userData["name"] ?? 'Dr. John Smith',
         email: userData["email"] ?? 'john.smith@example.com',
         mobile: userData["mobile"] ?? '+91 98765 43210',
-        password: userData["password"] ?? '********',
         specialty: userData["specialty"] ?? 'Orthopedic Physiotherapy',
         experienceYears: userData["experienceYears"] ?? 5,
         clinicName: userData["clinic"] ?? "PrimeHealth Clinic",
         clinicAddress: userData["clinicAddress"] ?? '123, Medical Street, City, State, 395009',
-        referralCode: userData["referralCode"] ?? 'ABC',
-        ownReferralCode: userData["ownReferralCode"] ?? 'AAA',
-        registrationDate: userData["registrationDate"] ?? DateTime.now().toIso8601String(),
-        fcmToken: userData["fcmToken"] ?? '',
       );
       String channelName = "${userModel.id}_${appointment.id}_${DateTime.now().millisecondsSinceEpoch}";
-      CallData callData = CallData(senderId: userModel.id, senderName: userModel.name, senderFCMToken: userModel.fcmToken, callType: callType, status: CallStatus.calling, channelName: channelName);
+      CallData callData = CallData(senderId: userModel.id, senderName: userModel.name, senderFCMToken: "", callType: callType, status: CallStatus.calling, channelName: channelName);
       CallingService().makeCall(appointment.fcmToken, callData);
       if (context.mounted) {
         await Navigator.push(

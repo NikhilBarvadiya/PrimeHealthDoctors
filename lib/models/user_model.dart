@@ -1,32 +1,112 @@
 class UserModel {
-  final String id;
-  final String name;
-  final String email;
-  final String mobile;
-  final String password;
-  final String specialty;
-  final int experienceYears;
-  final String clinicName;
-  final String clinicAddress;
-  final String referralCode;
-  final String ownReferralCode;
-  final String registrationDate;
-  final String fcmToken;
-
+  String id;
+  String name;
+  String email;
+  String mobile;
+  String license;
+  String specialty;
+  String bio;
+  int experienceYears;
+  String clinicName;
+  String clinicAddress;
+  String profileImage;
+  Pricing pricing;
+  List<Certification> certifications;
+  bool isActive;
+  DateTime createdAt;
 
   UserModel({
-    required this.id,
-    required this.name,
-    required this.email,
-    required this.mobile,
-    required this.password,
-    required this.specialty,
-    required this.experienceYears,
-    required this.clinicName,
-    required this.clinicAddress,
-    required this.referralCode,
-    required this.ownReferralCode,
-    required this.registrationDate,
-    required this.fcmToken,
-  });
+    this.id = '',
+    this.name = '',
+    this.email = '',
+    this.mobile = '',
+    this.license = '',
+    this.specialty = '',
+    this.bio = '',
+    this.experienceYears = 0,
+    this.clinicName = '',
+    this.clinicAddress = '',
+    this.profileImage = '',
+    Pricing? pricing,
+    List<Certification>? certifications,
+    this.isActive = true,
+    DateTime? createdAt,
+  }) : pricing = pricing ?? Pricing(),
+       certifications = certifications ?? [],
+       createdAt = createdAt ?? DateTime.now();
+
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
+      id: json['_id']?.toString() ?? '',
+      name: json['name'] ?? '',
+      email: json['email'] ?? '',
+      mobile: json['mobileNo'] ?? '',
+      license: json['license'] ?? '',
+      specialty: json['specialty'] is Map ? json['specialty']['name'] ?? '' : json['specialty']?.toString() ?? '',
+      bio: json['bio'] ?? '',
+      experienceYears: json['experienceYears'] ?? 0,
+      clinicName: json['clinicName'] ?? '',
+      clinicAddress: json['clinicAddress'] ?? '',
+      profileImage: json['profileImage'] ?? '',
+      pricing: json['pricing'] != null ? Pricing.fromJson(json['pricing']) : Pricing(),
+      certifications: json['certifications'] != null ? List<Certification>.from(json['certifications'].map((x) => Certification.fromJson(x))) : [],
+      isActive: json['isActive'] ?? true,
+      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'email': email,
+      'mobileNo': mobile,
+      'license': license,
+      'specialty': specialty,
+      'bio': bio,
+      'experienceYears': experienceYears,
+      'clinicName': clinicName,
+      'clinicAddress': clinicAddress,
+      'profileImage': profileImage,
+      'pricing': pricing.toJson(),
+      'certifications': certifications.map((x) => x.toJson()).toList(),
+      'isActive': isActive,
+    };
+  }
+}
+
+class Pricing {
+  int consultationFee;
+  int followUpFee;
+
+  Pricing({this.consultationFee = 500, this.followUpFee = 300});
+
+  factory Pricing.fromJson(Map<String, dynamic> json) {
+    return Pricing(consultationFee: int.tryParse(json['consultationFee'].toString()) ?? 500, followUpFee: int.tryParse(json['followUpFee'].toString()) ?? 300);
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'consultationFee': consultationFee, 'followUpFee': followUpFee};
+  }
+}
+
+class Certification {
+  String name;
+  String document;
+  String issuedBy;
+  DateTime issueDate;
+
+  Certification({required this.name, required this.document, required this.issuedBy, required this.issueDate});
+
+  factory Certification.fromJson(Map<String, dynamic> json) {
+    return Certification(
+      name: json['name'] ?? '',
+      document: json['document'] ?? '',
+      issuedBy: json['issuedBy'] ?? '',
+      issueDate: json['issueDate'] != null ? DateTime.parse(json['issueDate']) : DateTime.now(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'name': name, 'document': document, 'issuedBy': issuedBy, 'issueDate': issueDate.toIso8601String()};
+  }
 }

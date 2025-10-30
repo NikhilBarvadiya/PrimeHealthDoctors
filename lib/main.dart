@@ -14,6 +14,7 @@ import 'package:prime_health_doctors/utils/config/app_config.dart';
 import 'package:prime_health_doctors/utils/routes/route_methods.dart';
 import 'package:prime_health_doctors/utils/routes/route_name.dart';
 import 'package:prime_health_doctors/utils/theme/light.dart';
+import 'package:prime_health_doctors/views/preload.dart';
 import 'package:prime_health_doctors/views/restart.dart';
 import 'package:toastification/toastification.dart';
 
@@ -30,6 +31,7 @@ Future<void> main() async {
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   await CallingInitMethod().initData();
+  await preload();
   runApp(const RestartApp(child: MyApp()));
 }
 

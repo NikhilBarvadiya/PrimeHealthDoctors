@@ -134,26 +134,14 @@ class CallingInitMethod {
                 name: userData["name"] ?? 'Dr. John Smith',
                 email: userData["email"] ?? 'john.smith@example.com',
                 mobile: userData["mobile"] ?? '+91 98765 43210',
-                password: userData["password"] ?? '********',
                 specialty: userData["specialty"] ?? 'Orthopedic Physiotherapy',
                 experienceYears: userData["experienceYears"] ?? 5,
                 clinicName: userData["clinic"] ?? "PrimeHealth Clinic",
                 clinicAddress: userData["clinicAddress"] ?? '123, Medical Street, City, State, 395009',
-                referralCode: userData["referralCode"] ?? 'ABC',
-                ownReferralCode: userData["ownReferralCode"] ?? 'AAA',
-                registrationDate: userData["registrationDate"] ?? DateTime.now().toIso8601String(),
-                fcmToken: userData["fcmToken"] ?? '',
               );
               CallingService().makeCall(
                 callData.senderFCMToken,
-                CallData(
-                  senderId: userModel.id,
-                  senderName: userModel.name,
-                  senderFCMToken: userModel.fcmToken,
-                  callType: callData.callType,
-                  status: CallStatus.rejected,
-                  channelName: callData.channelName,
-                ),
+                CallData(senderId: userModel.id, senderName: userModel.name, senderFCMToken: "", callType: callData.callType, status: CallStatus.rejected, channelName: callData.channelName),
               );
             }
             Get.back();
@@ -174,15 +162,10 @@ class CallingInitMethod {
       name: userData["name"] ?? 'Dr. John Smith',
       email: userData["email"] ?? 'john.smith@example.com',
       mobile: userData["mobile"] ?? '+91 98765 43210',
-      password: userData["password"] ?? '********',
       specialty: userData["specialty"] ?? 'Orthopedic Physiotherapy',
       experienceYears: userData["experienceYears"] ?? 5,
       clinicName: userData["clinic"] ?? "PrimeHealth Clinic",
       clinicAddress: userData["clinicAddress"] ?? '123, Medical Street, City, State, 395009',
-      referralCode: userData["referralCode"] ?? 'ABC',
-      ownReferralCode: userData["ownReferralCode"] ?? 'AAA',
-      registrationDate: userData["registrationDate"] ?? DateTime.now().toIso8601String(),
-      fcmToken: userData["fcmToken"] ?? '',
     );
     if (context.mounted) {
       await Navigator.of(context).push(

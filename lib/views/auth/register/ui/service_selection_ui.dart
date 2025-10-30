@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:prime_health_doctors/models/service_model.dart';
 import 'package:prime_health_doctors/utils/theme/light.dart';
 
 class ServiceSelectionUI extends StatefulWidget {
   final String title;
-  final List<ServiceModel> items;
-  final List<ServiceModel> selectedItems;
-  final Function(List<ServiceModel>) onSelectionChanged;
+  final List<dynamic> items;
+  final dynamic selectedItems;
+  final Function(dynamic) onSelectionChanged;
   final String itemType;
 
   const ServiceSelectionUI({super.key, required this.title, required this.items, required this.selectedItems, required this.onSelectionChanged, required this.itemType});
@@ -17,14 +16,14 @@ class ServiceSelectionUI extends StatefulWidget {
 }
 
 class _ServiceSelectionUIState extends State<ServiceSelectionUI> {
-  late List<ServiceModel> _tempSelected;
+  late dynamic _tempSelected;
   final TextEditingController _searchController = TextEditingController();
-  List<ServiceModel> _filteredItems = [];
+  List<dynamic> _filteredItems = [];
 
   @override
   void initState() {
     super.initState();
-    _tempSelected = List.from(widget.selectedItems);
+    _tempSelected = widget.selectedItems;
     _filteredItems = widget.items;
     _searchController.addListener(_filterItems);
   }
@@ -35,30 +34,18 @@ class _ServiceSelectionUIState extends State<ServiceSelectionUI> {
       if (query.isEmpty) {
         _filteredItems = widget.items;
       } else {
-        _filteredItems = widget.items.where((item) => item.name.toLowerCase().contains(query) || item.description.toLowerCase().contains(query)).toList();
+        _filteredItems = widget.items.where((item) => item["name"].toLowerCase().contains(query)).toList();
       }
     });
   }
 
-  void _toggleSelection(ServiceModel item) {
+  void _toggleSelection(dynamic item) {
     setState(() {
-      if (_tempSelected.contains(item)) {
-        _tempSelected.remove(item);
+      if (_tempSelected == item) {
+        _tempSelected = null;
       } else {
-        _tempSelected.add(item);
+        _tempSelected = item;
       }
-    });
-  }
-
-  void _selectAll() {
-    setState(() {
-      _tempSelected = List.from(widget.items);
-    });
-  }
-
-  void _clearAll() {
-    setState(() {
-      _tempSelected.clear();
     });
   }
 
@@ -81,7 +68,7 @@ class _ServiceSelectionUIState extends State<ServiceSelectionUI> {
         color: AppTheme.backgroundWhite,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      child: SafeArea(child: Column(children: [_buildHeaderSection(), _buildSearchSection(), _buildSelectionActions(), _buildServicesList(), _buildBottomActions()])),
+      child: SafeArea(child: Column(children: [_buildHeaderSection(), _buildSearchSection(), _buildServicesList(), _buildBottomActions()])),
     );
   }
 
@@ -111,7 +98,7 @@ class _ServiceSelectionUIState extends State<ServiceSelectionUI> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Select medical services you offer',
+                  'Select medical specialise you offer',
                   style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w400, color: AppTheme.textSecondary),
                 ),
               ],
@@ -134,7 +121,7 @@ class _ServiceSelectionUIState extends State<ServiceSelectionUI> {
         child: TextField(
           controller: _searchController,
           decoration: InputDecoration(
-            hintText: 'Search medical services...',
+            hintText: 'Search medical specialise...',
             hintStyle: GoogleFonts.inter(color: AppTheme.textLight, fontWeight: FontWeight.w400),
             border: InputBorder.none,
             prefixIcon: Icon(Icons.search_rounded, color: AppTheme.textSecondary, size: 22),
@@ -155,47 +142,6 @@ class _ServiceSelectionUIState extends State<ServiceSelectionUI> {
     );
   }
 
-  Widget _buildSelectionActions() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Row(
-        children: [
-          Expanded(
-            child: OutlinedButton(
-              onPressed: _selectAll,
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                side: BorderSide(color: AppTheme.borderColor),
-              ),
-              child: Text(
-                'Select All',
-                style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.primaryBlue),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: OutlinedButton(
-              onPressed: _clearAll,
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(color: AppTheme.borderColor),
-                ),
-              ),
-              child: Text(
-                'Clear All',
-                style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textSecondary),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildServicesList() {
     return Expanded(
       child: _filteredItems.isEmpty
@@ -205,14 +151,14 @@ class _ServiceSelectionUIState extends State<ServiceSelectionUI> {
               itemCount: _filteredItems.length,
               itemBuilder: (context, index) {
                 final item = _filteredItems[index];
-                final isSelected = _tempSelected.contains(item);
+                final isSelected = _tempSelected["_id"] == item["_id"];
                 return _buildServiceItem(item, isSelected);
               },
             ),
     );
   }
 
-  Widget _buildServiceItem(ServiceModel item, bool isSelected) {
+  Widget _buildServiceItem(dynamic item, bool isSelected) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -234,7 +180,7 @@ class _ServiceSelectionUIState extends State<ServiceSelectionUI> {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(color: isSelected ? AppTheme.primaryBlue : AppTheme.backgroundLight, borderRadius: BorderRadius.circular(10)),
-                  child: Icon(item.icon, color: isSelected ? Colors.white : AppTheme.primaryBlue, size: 20),
+                  child: Icon(Icons.psychology, color: isSelected ? Colors.white : AppTheme.primaryBlue, size: 20),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -242,15 +188,8 @@ class _ServiceSelectionUIState extends State<ServiceSelectionUI> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        item.name,
+                        item["name"],
                         style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        item.description,
-                        style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w400, color: AppTheme.textSecondary, letterSpacing: .5),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -331,23 +270,9 @@ class _ServiceSelectionUIState extends State<ServiceSelectionUI> {
                 elevation: 0,
                 shadowColor: Colors.transparent,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Confirm',
-                    style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white),
-                  ),
-                  const SizedBox(width: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(10)),
-                    child: Text(
-                      '${_tempSelected.length}',
-                      style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white),
-                    ),
-                  ),
-                ],
+              child: Text(
+                'Confirm',
+                style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white),
               ),
             ),
           ),

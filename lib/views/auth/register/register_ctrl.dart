@@ -1,41 +1,78 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:prime_health_doctors/models/service_model.dart';
-import 'package:prime_health_doctors/service/calling_service.dart';
-import 'package:prime_health_doctors/utils/config/session.dart';
 import 'package:prime_health_doctors/utils/routes/route_name.dart';
-import 'package:prime_health_doctors/utils/storage.dart';
 import 'package:prime_health_doctors/utils/toaster.dart';
+import 'package:prime_health_doctors/views/auth/auth_service.dart';
 
 class RegisterCtrl extends GetxController {
   final nameCtrl = TextEditingController();
   final emailCtrl = TextEditingController();
-  final passwordCtrl = TextEditingController();
   final mobileCtrl = TextEditingController();
-  final clinicCtrl = TextEditingController();
   final specialtyCtrl = TextEditingController();
-  final referralCodeCtrl = TextEditingController();
+  final licenseCtrl = TextEditingController();
+  final bioCtrl = TextEditingController();
+  final consultationFeeCtrl = TextEditingController(text: '500');
+  final followUpFeeCtrl = TextEditingController(text: '300');
 
-  var isLoading = false.obs, isPasswordVisible = false.obs;
-  var services = <ServiceModel>[
-    ServiceModel(id: 1, name: 'Ortho', description: 'Comprehensive rehabilitation for joint and muscle injuries, focusing on strength and mobility.', icon: Icons.fitness_center, isActive: true),
-    ServiceModel(id: 2, name: 'Neuro', description: 'Specialized therapy for neurological conditions to enhance motor skills and coordination.', icon: Icons.psychology, isActive: false),
-    ServiceModel(id: 3, name: 'Sports', description: 'Tailored recovery programs for athletes to regain peak performance post-injury.', icon: Icons.sports_tennis, isActive: true),
-    ServiceModel(id: 4, name: 'Maternity', description: 'Supportive exercises for prenatal and postnatal care to promote maternal health.', icon: Icons.pregnant_woman, isActive: true),
-    ServiceModel(id: 5, name: 'Fitness', description: 'Personalized fitness plans to improve strength, flexibility, and overall wellness.', icon: Icons.directions_run, isActive: false),
-    ServiceModel(id: 6, name: 'Geriatric', description: 'Gentle therapy for elderly patients to improve mobility and reduce pain.', icon: Icons.elderly, isActive: true),
-    ServiceModel(id: 7, name: 'Pediatric', description: 'Therapy for children to support developmental and physical milestones.', icon: Icons.child_care, isActive: true),
-    ServiceModel(id: 8, name: 'Pain Management', description: 'Advanced techniques to alleviate chronic pain and improve quality of life.', icon: Icons.healing, isActive: false),
-  ].obs;
-  var selectedServices = <ServiceModel>[].obs;
+  var isLoading = false.obs, isSpecialtyLoading = false.obs;
+  var specialities = <dynamic>[].obs;
+  var selectedSpecialty = ''.obs, selectedSpecialtyName = ''.obs;
 
-  void togglePasswordVisibility() => isPasswordVisible.toggle();
+  var certifications = <Map<String, String>>[].obs;
 
-  void updateSelectedServices(List<ServiceModel> newSelection) {
-    selectedServices.assignAll(newSelection);
+  AuthService get authService => Get.find<AuthService>();
+
+  @override
+  void onInit() {
+    _loadInitialData();
+    super.onInit();
   }
 
-  void clearReferralCode() => referralCodeCtrl.clear();
+  void _loadInitialData() async => await loadSpecialities();
+
+  Future<void> loadSpecialities() async {
+    isSpecialtyLoading.value = true;
+    try {
+      final data = await authService.getSpecialities();
+      specialities.assignAll(data);
+    } finally {
+      isSpecialtyLoading.value = false;
+    }
+  }
+
+  void setSelectedSpecialty(dynamic specialty) {
+    selectedSpecialty.value = specialty["_id"] ?? '';
+    selectedSpecialtyName.value = specialty["name"] ?? '';
+  }
+
+  void updateConsultationFee(String fee) {
+    consultationFeeCtrl.text = fee;
+  }
+
+  void updateFollowUpFee(String fee) {
+    followUpFeeCtrl.text = fee;
+  }
+
+  void addCertification() {
+    if (certifications.isNotEmpty && certifications.last["name"] == "") {
+      toaster.warning("Current certification name is missing...!");
+      return;
+    }
+    certifications.add({'name': '', 'issuedBy': '', 'issueDate': DateTime.now().toIso8601String().split('T')[0]});
+  }
+
+  void updateCertification(int index, String field, String value) {
+    if (index < certifications.length) {
+      certifications[index][field] = value;
+      certifications.refresh();
+    }
+  }
+
+  void removeCertification(int index) {
+    if (index < certifications.length) {
+      certifications.removeAt(index);
+    }
+  }
 
   Future<void> register() async {
     if (nameCtrl.text.isEmpty) {
@@ -47,62 +84,69 @@ class RegisterCtrl extends GetxController {
     if (!GetUtils.isEmail(emailCtrl.text)) {
       return toaster.warning('Please enter a valid email');
     }
-    if (passwordCtrl.text.isEmpty) {
-      return toaster.warning('Please enter your password');
-    }
-    if (passwordCtrl.text.length < 6) {
-      return toaster.warning('Password must be at least 6 characters');
-    }
     if (mobileCtrl.text.isEmpty) {
       return toaster.warning('Please enter your mobile number');
     }
     if (!GetUtils.isPhoneNumber(mobileCtrl.text)) {
       return toaster.warning('Please enter a valid mobile number');
     }
-    if (clinicCtrl.text.isEmpty) {
-      return toaster.warning('Please enter your clinic name');
+    if (selectedSpecialty.isEmpty) {
+      return toaster.warning('Please select your specialty');
     }
-    if (specialtyCtrl.text.isEmpty) {
-      return toaster.warning('Please enter the specialty');
+    if (licenseCtrl.text.isEmpty) {
+      return toaster.warning('Please enter your license number');
     }
-    if (selectedServices.isEmpty) {
-      return toaster.warning('Please select at least one service');
+    if (consultationFeeCtrl.text.isEmpty) {
+      return toaster.warning('Please enter consultation fee');
+    }
+    if (followUpFeeCtrl.text.isEmpty) {
+      return toaster.warning('Please enter follow-up fee');
+    }
+    for (int i = 0; i < certifications.length; i++) {
+      final cert = certifications[i];
+      if (cert['name']?.isEmpty ?? true) {
+        return toaster.warning('Please enter certification name for certification ${i + 1}');
+      }
+      if (cert['issuedBy']?.isEmpty ?? true) {
+        return toaster.warning('Please enter issuing authority for certification ${i + 1}');
+      }
     }
     isLoading.value = true;
     try {
-      String? getToken = await CallingService().getToken();
       final request = {
-        'name': nameCtrl.text.trim(),
-        'email': emailCtrl.text.trim(),
-        'password': passwordCtrl.text.trim(),
-        'mobile': mobileCtrl.text.trim(),
-        'clinic': clinicCtrl.text.trim(),
-        'specialty': specialtyCtrl.text.trim(),
-        'services': selectedServices.map((e) => e.name).toList(),
-        'referralCode': referralCodeCtrl.text.trim().isNotEmpty ? referralCodeCtrl.text.trim() : null,
-        'ownReferralCode': _generateReferralCode(),
-        'fcmToken': getToken ?? "",
-        'registrationDate': DateTime.now().toIso8601String(),
+        "name": nameCtrl.text.trim(),
+        "email": emailCtrl.text.trim(),
+        "mobileNo": mobileCtrl.text.trim(),
+        "license": licenseCtrl.text.trim(),
+        "specialty": selectedSpecialty.value,
+        "bio": bioCtrl.text.trim(),
+        "pricing": {"consultationFee": int.tryParse(consultationFeeCtrl.text) ?? 500, "followUpFee": int.tryParse(followUpFeeCtrl.text) ?? 300},
+        "certifications": certifications.isNotEmpty
+            ? certifications
+            : [
+                {"name": "Medical License", "issuedBy": "Medical Board", "issueDate": DateTime.now().toIso8601String().split('T')[0]},
+              ],
       };
-      await write(AppSession.token, DateTime.now().toIso8601String());
-      await write(AppSession.userData, request);
-      toaster.success("Congratulations, Registration successfully completed.");
-      emailCtrl.clear();
-      passwordCtrl.clear();
-      mobileCtrl.clear();
-      clinicCtrl.clear();
-      specialtyCtrl.clear();
-      selectedServices.clear();
-      Get.toNamed(AppRouteNames.dashboard);
+      final success = await authService.registerDoctor(request);
+      if (success) {
+        _clearForm();
+        Get.back();
+      }
     } finally {
       isLoading.value = false;
     }
   }
 
-  String _generateReferralCode() {
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final random = DateTime.now().microsecondsSinceEpoch % 10000;
-    return 'PH${timestamp.toString().substring(8)}${random.toString().padLeft(4, '0')}';
+  void _clearForm() {
+    nameCtrl.clear();
+    emailCtrl.clear();
+    mobileCtrl.clear();
+    licenseCtrl.clear();
+    bioCtrl.clear();
+    consultationFeeCtrl.text = '500';
+    followUpFeeCtrl.text = '300';
+    selectedSpecialty.value = '';
+    certifications.clear();
   }
 
   void goToLogin() => Get.toNamed(AppRouteNames.login);

@@ -657,7 +657,7 @@ class _CallingViewState extends State<CallingView> with TickerProviderStateMixin
     CallData callData = CallData(
       senderId: widget.sender.id,
       senderName: widget.sender.name,
-      senderFCMToken: widget.sender.fcmToken,
+      senderFCMToken: "",
       callType: widget.callType,
       status: CallStatus.ended,
       channelName: widget.channelName,

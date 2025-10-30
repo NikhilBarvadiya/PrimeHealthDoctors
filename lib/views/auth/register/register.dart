@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:prime_health_doctors/models/service_model.dart';
 import 'package:prime_health_doctors/utils/theme/light.dart';
 import 'package:prime_health_doctors/views/auth/register/register_ctrl.dart';
 import 'package:prime_health_doctors/views/auth/register/ui/service_selection_ui.dart';
@@ -89,27 +88,24 @@ class Register extends StatelessWidget {
         const SizedBox(height: 16),
         _buildEmailField(ctrl, context),
         const SizedBox(height: 16),
-        _buildPasswordField(ctrl, context),
-        const SizedBox(height: 16),
         _buildMobileField(ctrl, context),
         const SizedBox(height: 24),
         _buildSectionHeader('Professional Information'),
-        const SizedBox(height: 20),
-        _buildClinicField(ctrl, context),
         const SizedBox(height: 16),
         _buildSpecialtyField(ctrl, context),
-        const SizedBox(height: 24),
-        _buildSectionHeader('Services & Referrals'),
-        const SizedBox(height: 20),
-        _buildServicesField(ctrl, context),
         const SizedBox(height: 16),
-        _buildReferralCodeField(ctrl, context),
-        Obx(() {
-          if (ctrl.selectedServices.isNotEmpty) {
-            return Column(children: [const SizedBox(height: 16), _buildSelectedServicesPreview(ctrl)]);
-          }
-          return const SizedBox();
-        }),
+        _buildLicenseField(ctrl, context),
+        const SizedBox(height: 16),
+        _buildBioField(ctrl, context),
+        const SizedBox(height: 24),
+        _buildSectionHeader('Pricing'),
+        const SizedBox(height: 16),
+        _buildPricingField(ctrl, context),
+        const SizedBox(height: 24),
+        _buildSectionHeader('Certifications'),
+        const SizedBox(height: 16),
+        _buildCertificationsField(ctrl, context),
+        const SizedBox(height: 24),
       ],
     );
   }
@@ -131,7 +127,7 @@ class Register extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         TextFormField(
-          controller: ctrl.clinicCtrl,
+          controller: ctrl.nameCtrl,
           textInputAction: TextInputAction.next,
           style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: AppTheme.textPrimary),
           decoration: InputDecoration(
@@ -198,51 +194,6 @@ class Register extends StatelessWidget {
     );
   }
 
-  Widget _buildPasswordField(RegisterCtrl ctrl, BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Password',
-          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
-        ),
-        const SizedBox(height: 8),
-        Obx(() {
-          return TextFormField(
-            controller: ctrl.passwordCtrl,
-            obscureText: !ctrl.isPasswordVisible.value,
-            textInputAction: TextInputAction.next,
-            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: AppTheme.textPrimary),
-            decoration: InputDecoration(
-              hintText: 'Create a strong password',
-              hintStyle: GoogleFonts.inter(color: AppTheme.textLight, fontWeight: FontWeight.w400),
-              prefixIcon: Icon(Icons.lock_rounded, color: AppTheme.textSecondary, size: 22),
-              suffixIcon: IconButton(
-                onPressed: ctrl.togglePasswordVisibility,
-                icon: Icon(ctrl.isPasswordVisible.value ? Icons.visibility_rounded : Icons.visibility_off_rounded, color: AppTheme.textSecondary, size: 22),
-              ),
-              filled: true,
-              fillColor: AppTheme.backgroundWhite,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Colors.transparent),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: AppTheme.borderColor),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: AppTheme.primaryBlue, width: 2),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            ),
-          );
-        }),
-      ],
-    );
-  }
-
   Widget _buildMobileField(RegisterCtrl ctrl, BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -284,44 +235,6 @@ class Register extends StatelessWidget {
     );
   }
 
-  Widget _buildClinicField(RegisterCtrl ctrl, BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Clinic/Hospital Name',
-          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: ctrl.clinicCtrl,
-          textInputAction: TextInputAction.next,
-          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: AppTheme.textPrimary),
-          decoration: InputDecoration(
-            hintText: 'Enter your clinic or hospital name',
-            hintStyle: GoogleFonts.inter(color: AppTheme.textLight, fontWeight: FontWeight.w400),
-            prefixIcon: Icon(Icons.business_rounded, color: AppTheme.textSecondary, size: 22),
-            filled: true,
-            fillColor: AppTheme.backgroundWhite,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.transparent),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppTheme.borderColor),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppTheme.primaryBlue, width: 2),
-            ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildSpecialtyField(RegisterCtrl ctrl, BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -331,14 +244,77 @@ class Register extends StatelessWidget {
           style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
         ),
         const SizedBox(height: 8),
+        Obx(() {
+          return ctrl.isSpecialtyLoading.value ? _buildLoadingField('Loading specialities...') : _buildSpecialtyDropdown(context, ctrl);
+        }),
+      ],
+    );
+  }
+
+  Widget _buildSpecialtyDropdown(BuildContext context, RegisterCtrl ctrl) {
+    return TextFormField(
+      readOnly: true,
+      controller: TextEditingController(text: ctrl.selectedSpecialtyName.value),
+      onTap: () => _showServicesSelection(context, ctrl),
+      decoration: InputDecoration(
+        hintText: 'Select your medical specialty',
+        hintStyle: GoogleFonts.inter(color: AppTheme.textLight, fontWeight: FontWeight.w400),
+        prefixIcon: Icon(Icons.medical_services_rounded, color: AppTheme.textSecondary, size: 22),
+        suffixIcon: Icon(Icons.arrow_drop_down_rounded, color: AppTheme.textSecondary, size: 22),
+        filled: true,
+        fillColor: AppTheme.backgroundWhite,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.transparent),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppTheme.borderColor),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppTheme.primaryBlue, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      ),
+    );
+  }
+
+  Widget _buildLoadingField(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      decoration: BoxDecoration(
+        color: AppTheme.backgroundWhite,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.borderColor),
+      ),
+      child: Row(
+        children: [
+          SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+          const SizedBox(width: 12),
+          Text(text, style: GoogleFonts.inter(color: AppTheme.textLight)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLicenseField(RegisterCtrl ctrl, BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Medical License Number',
+          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+        ),
+        const SizedBox(height: 8),
         TextFormField(
-          controller: ctrl.specialtyCtrl,
+          controller: ctrl.licenseCtrl,
           textInputAction: TextInputAction.next,
           style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: AppTheme.textPrimary),
           decoration: InputDecoration(
-            hintText: 'e.g., Orthopedics, Neurology, Cardiology',
+            hintText: 'Enter your medical license number',
             hintStyle: GoogleFonts.inter(color: AppTheme.textLight, fontWeight: FontWeight.w400),
-            prefixIcon: Icon(Icons.medical_services_rounded, color: AppTheme.textSecondary, size: 22),
+            prefixIcon: Icon(Icons.badge_rounded, color: AppTheme.textSecondary, size: 22),
             filled: true,
             fillColor: AppTheme.backgroundWhite,
             border: OutlineInputBorder(
@@ -360,176 +336,304 @@ class Register extends StatelessWidget {
     );
   }
 
-  Widget _buildServicesField(RegisterCtrl ctrl, BuildContext context) {
+  Widget _buildBioField(RegisterCtrl ctrl, BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Services Offered',
+          'Professional Bio',
           style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
         ),
         const SizedBox(height: 8),
-        _buildEnhancedMultiSelectField(
-          context: context,
-          items: ctrl.services,
-          selectedItems: ctrl.selectedServices,
-          hint: 'Select services you offer',
-          icon: Icons.medical_services_rounded,
-          onTap: () => _showServicesSelection(context, ctrl),
+        TextFormField(
+          controller: ctrl.bioCtrl,
+          maxLines: 3,
+          textInputAction: TextInputAction.next,
+          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: AppTheme.textPrimary),
+          decoration: InputDecoration(
+            hintText: 'Brief about your professional experience...',
+            hintStyle: GoogleFonts.inter(color: AppTheme.textLight, fontWeight: FontWeight.w400),
+            alignLabelWithHint: true,
+            filled: true,
+            fillColor: AppTheme.backgroundWhite,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.transparent),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: AppTheme.borderColor),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: AppTheme.primaryBlue, width: 2),
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildReferralCodeField(RegisterCtrl ctrl, BuildContext context) {
+  Widget _buildPricingField(RegisterCtrl ctrl, BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Pricing',
+          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Consultation Fee',
+                    style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: AppTheme.textSecondary),
+                  ),
+                  const SizedBox(height: 4),
+                  TextFormField(
+                    controller: ctrl.consultationFeeCtrl,
+                    keyboardType: TextInputType.number,
+                    style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: AppTheme.textPrimary),
+                    decoration: InputDecoration(
+                      hintText: '500',
+                      hintStyle: GoogleFonts.inter(color: AppTheme.textLight, fontWeight: FontWeight.w400),
+                      prefixIcon: Icon(Icons.currency_rupee_rounded, color: AppTheme.textSecondary, size: 18),
+                      filled: true,
+                      fillColor: AppTheme.backgroundWhite,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(color: Colors.transparent),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: AppTheme.borderColor),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: AppTheme.primaryBlue, width: 1.5),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Follow-up Fee',
+                    style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: AppTheme.textSecondary),
+                  ),
+                  const SizedBox(height: 4),
+                  TextFormField(
+                    controller: ctrl.followUpFeeCtrl,
+                    keyboardType: TextInputType.number,
+                    style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: AppTheme.textPrimary),
+                    decoration: InputDecoration(
+                      hintText: '300',
+                      hintStyle: GoogleFonts.inter(color: AppTheme.textLight, fontWeight: FontWeight.w400),
+                      prefixIcon: Icon(Icons.currency_rupee_rounded, color: AppTheme.textSecondary, size: 18),
+                      filled: true,
+                      fillColor: AppTheme.backgroundWhite,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(color: Colors.transparent),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: AppTheme.borderColor),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: AppTheme.primaryBlue, width: 1.5),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCertificationsField(RegisterCtrl ctrl, BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
             Text(
-              'Referral Code',
+              'Certifications',
               style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
             ),
-            const SizedBox(width: 6),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(color: AppTheme.accentGreen.withOpacity(0.1), borderRadius: BorderRadius.circular(4)),
-              child: Text(
-                'Optional',
-                style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w500, color: AppTheme.accentGreen),
-              ),
+            const Spacer(),
+            IconButton(
+              onPressed: ctrl.addCertification,
+              icon: Icon(Icons.add_circle_rounded, color: AppTheme.primaryBlue, size: 20),
+              tooltip: 'Add Certification',
             ),
           ],
         ),
         const SizedBox(height: 8),
-        TextFormField(
-          controller: ctrl.referralCodeCtrl,
-          textInputAction: TextInputAction.done,
-          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: AppTheme.textPrimary),
-          onChanged: (txt) => ctrl.update(),
-          decoration: InputDecoration(
-            hintText: 'Enter referral code (if any)',
-            hintStyle: GoogleFonts.inter(color: AppTheme.textLight, fontWeight: FontWeight.w400),
-            prefixIcon: Icon(Icons.people_alt_rounded, color: AppTheme.textSecondary, size: 22),
-            suffixIcon: ctrl.referralCodeCtrl.text.isEmpty
-                ? SizedBox.shrink()
-                : IconButton(
-                    onPressed: ctrl.clearReferralCode,
-                    icon: Icon(Icons.close_rounded, color: AppTheme.textLight, size: 20),
-                  ),
-            filled: true,
-            fillColor: AppTheme.backgroundWhite,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.transparent),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppTheme.borderColor),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppTheme.primaryBlue, width: 2),
-            ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          'If you were referred by another doctor, enter their referral code here',
-          style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary, fontWeight: FontWeight.w400),
-        ),
+        Obx(() {
+          if (ctrl.certifications.isEmpty) {
+            return _buildNoCertificationsPlaceholder(ctrl);
+          }
+          return Column(
+            children: [
+              ...ctrl.certifications.asMap().entries.map((entry) {
+                final index = entry.key;
+                final certification = entry.value;
+                return _buildCertificationItem(ctrl, context, index, certification);
+              }),
+            ],
+          );
+        }),
       ],
     );
   }
 
-  Widget _buildEnhancedMultiSelectField({
-    required BuildContext context,
-    required RxList<ServiceModel> items,
-    required RxList<ServiceModel> selectedItems,
-    required String hint,
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return Obx(
-      () => InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          decoration: BoxDecoration(
-            color: AppTheme.backgroundWhite,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: selectedItems.isEmpty ? AppTheme.borderColor : AppTheme.primaryBlue.withOpacity(0.3), width: selectedItems.isEmpty ? 1 : 1.5),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, size: 22, color: AppTheme.textSecondary),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      selectedItems.isEmpty ? hint : '${selectedItems.length} service${selectedItems.length > 1 ? 's' : ''} selected',
-                      style: GoogleFonts.inter(color: selectedItems.isEmpty ? AppTheme.textLight : AppTheme.textPrimary, fontSize: 14, fontWeight: FontWeight.w500),
-                    ),
-                    if (selectedItems.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        selectedItems.map((e) => e.name).join(', '),
-                        style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 12),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              Icon(Icons.arrow_drop_down_rounded, color: AppTheme.textSecondary, size: 24),
-            ],
-          ),
+  Widget _buildNoCertificationsPlaceholder(RegisterCtrl ctrl) {
+    return GestureDetector(
+      onTap: ctrl.addCertification,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppTheme.backgroundLight,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppTheme.borderColor, style: BorderStyle.solid),
+        ),
+        child: Column(
+          children: [
+            Icon(Icons.add_circle_outline_rounded, color: AppTheme.textLight, size: 32),
+            const SizedBox(height: 8),
+            Text(
+              'Add Your First Certification',
+              style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: AppTheme.textSecondary),
+            ),
+            const SizedBox(height: 4),
+            Text('Tap to add medical certifications', style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textLight)),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildSelectedServicesPreview(RegisterCtrl ctrl) {
+  Widget _buildCertificationItem(RegisterCtrl ctrl, BuildContext context, int index, Map<String, String> certification) {
     return Container(
+      margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.primaryBlue.withOpacity(0.05),
+        color: AppTheme.backgroundWhite,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.2)),
+        border: Border.all(color: AppTheme.borderColor),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.check_circle_rounded, color: AppTheme.primaryBlue, size: 18),
-              const SizedBox(width: 8),
               Text(
-                'Selected Services',
-                style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.primaryBlue),
+                'Certification ${index + 1}',
+                style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+              ),
+              const Spacer(),
+              IconButton(
+                onPressed: () => ctrl.removeCertification(index),
+                icon: Icon(Icons.delete_rounded, color: Colors.red, size: 18),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          TextFormField(
+            initialValue: certification['name'],
+            onChanged: (value) => ctrl.updateCertification(index, 'name', value),
+            decoration: InputDecoration(
+              labelText: 'Certification Name',
+              labelStyle: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
+              hintText: 'e.g., MBBS, MD, Board Certification',
+              hintStyle: GoogleFonts.inter(color: AppTheme.textLight),
+              filled: true,
+              fillColor: AppTheme.backgroundWhite,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.transparent),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: AppTheme.borderColor),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: AppTheme.primaryBlue, width: 1.5),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            ),
+          ),
           const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: ctrl.selectedServices.map((service) {
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(color: AppTheme.primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-                child: Text(
-                  service.name,
-                  style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: AppTheme.primaryBlue),
-                ),
-              );
-            }).toList(),
+          TextFormField(
+            initialValue: certification['issuedBy'],
+            onChanged: (value) => ctrl.updateCertification(index, 'issuedBy', value),
+            decoration: InputDecoration(
+              labelText: 'Issuing Authority',
+              labelStyle: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
+              hintText: 'e.g., Medical Council, University',
+              hintStyle: GoogleFonts.inter(color: AppTheme.textLight),
+              filled: true,
+              fillColor: AppTheme.backgroundWhite,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.transparent),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: AppTheme.borderColor),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: AppTheme.primaryBlue, width: 1.5),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextFormField(
+            initialValue: certification['issueDate'],
+            onChanged: (value) => ctrl.updateCertification(index, 'issueDate', value),
+            decoration: InputDecoration(
+              labelText: 'Issue Date',
+              labelStyle: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
+              hintText: 'YYYY-MM-DD',
+              hintStyle: GoogleFonts.inter(color: AppTheme.textLight),
+              filled: true,
+              fillColor: AppTheme.backgroundWhite,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.transparent),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: AppTheme.borderColor),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: AppTheme.primaryBlue, width: 1.5),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            ),
           ),
         ],
       ),
@@ -644,7 +748,13 @@ class Register extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (context) => ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        child: ServiceSelectionUI(title: 'Select Medical Services', items: ctrl.services, selectedItems: ctrl.selectedServices, onSelectionChanged: ctrl.updateSelectedServices, itemType: 'services'),
+        child: ServiceSelectionUI(
+          title: 'Select Medical Specialise',
+          items: ctrl.specialities,
+          selectedItems: {"_id": ctrl.selectedSpecialty.value, "name": ctrl.selectedSpecialtyName.value},
+          onSelectionChanged: ctrl.setSelectedSpecialty,
+          itemType: 'services',
+        ),
       ),
     );
   }
