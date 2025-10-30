@@ -113,7 +113,7 @@ class AuthService extends GetxService {
     }
   }
 
-  Future<bool> updateProfile(Map<String, dynamic> request) async {
+  Future<bool> updateProfile(dynamic request) async {
     try {
       final response = await ApiManager().call(APIIndex.updateProfile, request, ApiType.post);
       if (response.status == 200) {
@@ -128,6 +128,53 @@ class AuthService extends GetxService {
       }
     } catch (err) {
       toaster.error('Profile update failed: ${err.toString()}');
+      return false;
+    }
+  }
+
+  Future<dynamic> getSlots(Map<String, dynamic> request) async {
+    try {
+      final response = await ApiManager().call(APIIndex.slots, request, ApiType.post);
+      if (response.status == 200 && response.data != null) {
+        return response.data;
+      } else {
+        toaster.warning(response.message ?? 'Failed to load slots');
+        return [];
+      }
+    } catch (err) {
+      toaster.error('Slots loading failed: ${err.toString()}');
+      return [];
+    }
+  }
+
+  Future<bool> manageSlots(Map<String, dynamic> request) async {
+    try {
+      final response = await ApiManager().call(APIIndex.manageSlots, request, ApiType.post);
+      if (response.status == 200) {
+        toaster.success(response.message ?? 'Slots updated successfully');
+        return true;
+      } else {
+        toaster.warning(response.message ?? 'Failed to update slots');
+        return false;
+      }
+    } catch (err) {
+      toaster.error('Slots update failed: ${err.toString()}');
+      return false;
+    }
+  }
+
+  Future<bool> deleteSlot(Map<String, dynamic> request) async {
+    try {
+      final response = await ApiManager().call(APIIndex.manageSlots, request, ApiType.post);
+      if (response.status == 200) {
+        toaster.success(response.message ?? 'Slots updated successfully');
+        return true;
+      } else {
+        toaster.warning(response.message ?? 'Failed to update slots');
+        return false;
+      }
+    } catch (err) {
+      toaster.error('Slots update failed: ${err.toString()}');
       return false;
     }
   }

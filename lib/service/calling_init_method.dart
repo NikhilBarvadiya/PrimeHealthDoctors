@@ -135,9 +135,6 @@ class CallingInitMethod {
                 email: userData["email"] ?? 'john.smith@example.com',
                 mobile: userData["mobile"] ?? '+91 98765 43210',
                 specialty: userData["specialty"] ?? 'Orthopedic Physiotherapy',
-                experienceYears: userData["experienceYears"] ?? 5,
-                clinicName: userData["clinic"] ?? "PrimeHealth Clinic",
-                clinicAddress: userData["clinicAddress"] ?? '123, Medical Street, City, State, 395009',
               );
               CallingService().makeCall(
                 callData.senderFCMToken,
@@ -163,9 +160,6 @@ class CallingInitMethod {
       email: userData["email"] ?? 'john.smith@example.com',
       mobile: userData["mobile"] ?? '+91 98765 43210',
       specialty: userData["specialty"] ?? 'Orthopedic Physiotherapy',
-      experienceYears: userData["experienceYears"] ?? 5,
-      clinicName: userData["clinic"] ?? "PrimeHealth Clinic",
-      clinicAddress: userData["clinicAddress"] ?? '123, Medical Street, City, State, 395009',
     );
     if (context.mounted) {
       await Navigator.of(context).push(

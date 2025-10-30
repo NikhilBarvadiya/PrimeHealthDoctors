@@ -6,10 +6,8 @@ class UserModel {
   String license;
   String specialty;
   String bio;
-  int experienceYears;
-  String clinicName;
-  String clinicAddress;
   String profileImage;
+  String logo;
   Pricing pricing;
   List<Certification> certifications;
   bool isActive;
@@ -23,10 +21,8 @@ class UserModel {
     this.license = '',
     this.specialty = '',
     this.bio = '',
-    this.experienceYears = 0,
-    this.clinicName = '',
-    this.clinicAddress = '',
     this.profileImage = '',
+    this.logo = '',
     Pricing? pricing,
     List<Certification>? certifications,
     this.isActive = true,
@@ -44,10 +40,8 @@ class UserModel {
       license: json['license'] ?? '',
       specialty: json['specialty'] is Map ? json['specialty']['name'] ?? '' : json['specialty']?.toString() ?? '',
       bio: json['bio'] ?? '',
-      experienceYears: json['experienceYears'] ?? 0,
-      clinicName: json['clinicName'] ?? '',
-      clinicAddress: json['clinicAddress'] ?? '',
       profileImage: json['profileImage'] ?? '',
+      logo: json['logo'] ?? '',
       pricing: json['pricing'] != null ? Pricing.fromJson(json['pricing']) : Pricing(),
       certifications: json['certifications'] != null ? List<Certification>.from(json['certifications'].map((x) => Certification.fromJson(x))) : [],
       isActive: json['isActive'] ?? true,
@@ -63,10 +57,8 @@ class UserModel {
       'license': license,
       'specialty': specialty,
       'bio': bio,
-      'experienceYears': experienceYears,
-      'clinicName': clinicName,
-      'clinicAddress': clinicAddress,
       'profileImage': profileImage,
+      'logo': logo,
       'pricing': pricing.toJson(),
       'certifications': certifications.map((x) => x.toJson()).toList(),
       'isActive': isActive,

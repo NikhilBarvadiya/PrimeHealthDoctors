@@ -473,9 +473,6 @@ class AppointmentDetails extends StatelessWidget {
         email: userData["email"] ?? 'john.smith@example.com',
         mobile: userData["mobile"] ?? '+91 98765 43210',
         specialty: userData["specialty"] ?? 'Orthopedic Physiotherapy',
-        experienceYears: userData["experienceYears"] ?? 5,
-        clinicName: userData["clinic"] ?? "PrimeHealth Clinic",
-        clinicAddress: userData["clinicAddress"] ?? '123, Medical Street, City, State, 395009',
       );
       String channelName = "${userModel.id}_${appointment.id}_${DateTime.now().millisecondsSinceEpoch}";
       CallData callData = CallData(senderId: userModel.id, senderName: userModel.name, senderFCMToken: "", callType: callType, status: CallStatus.calling, channelName: channelName);
