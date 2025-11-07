@@ -151,7 +151,7 @@ class _ServiceSelectionUIState extends State<ServiceSelectionUI> {
               itemCount: _filteredItems.length,
               itemBuilder: (context, index) {
                 final item = _filteredItems[index];
-                final isSelected = _tempSelected["_id"] == item["_id"];
+                final isSelected = _tempSelected == null ? false : _tempSelected["_id"] == item["_id"];
                 return _buildServiceItem(item, isSelected);
               },
             ),

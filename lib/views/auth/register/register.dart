@@ -92,6 +92,8 @@ class Register extends StatelessWidget {
         const SizedBox(height: 24),
         _buildSectionHeader('Professional Information'),
         const SizedBox(height: 16),
+        _buildServicesField(ctrl, context),
+        const SizedBox(height: 16),
         _buildSpecialtyField(ctrl, context),
         const SizedBox(height: 16),
         _buildLicenseField(ctrl, context),
@@ -245,9 +247,32 @@ class Register extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Obx(() {
+          if (ctrl.selectedService.value.isEmpty) {
+            return _buildInfoField('Please select a service first');
+          }
           return ctrl.isSpecialtyLoading.value ? _buildLoadingField('Loading specialities...') : _buildSpecialtyDropdown(context, ctrl);
         }),
       ],
+    );
+  }
+
+  Widget _buildInfoField(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      decoration: BoxDecoration(
+        color: AppTheme.backgroundLight,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.borderColor),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.info_outline_rounded, color: AppTheme.textLight, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(text, style: GoogleFonts.inter(fontSize: 14, color: AppTheme.textSecondary)),
+          ),
+        ],
+      ),
     );
   }
 
@@ -255,11 +280,72 @@ class Register extends StatelessWidget {
     return TextFormField(
       readOnly: true,
       controller: TextEditingController(text: ctrl.selectedSpecialtyName.value),
-      onTap: () => _showServicesSelection(context, ctrl),
+      onTap: () => _showSelectionBottomSheet(
+        context,
+        ctrl,
+        'Select Medical Specialty',
+        ctrl.specialities,
+        ctrl.selectedSpecialty.value.isNotEmpty ? {"_id": ctrl.selectedSpecialty.value, "name": ctrl.selectedSpecialtyName.value} : null,
+        ctrl.setSelectedSpecialty,
+        'specialty',
+      ),
       decoration: InputDecoration(
         hintText: 'Select your medical specialty',
         hintStyle: GoogleFonts.inter(color: AppTheme.textLight, fontWeight: FontWeight.w400),
         prefixIcon: Icon(Icons.medical_services_rounded, color: AppTheme.textSecondary, size: 22),
+        suffixIcon: Icon(Icons.arrow_drop_down_rounded, color: AppTheme.textSecondary, size: 22),
+        filled: true,
+        fillColor: AppTheme.backgroundWhite,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.transparent),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppTheme.borderColor),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppTheme.primaryBlue, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      ),
+    );
+  }
+
+  Widget _buildServicesField(RegisterCtrl ctrl, BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Medical Services',
+          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+        ),
+        const SizedBox(height: 8),
+        Obx(() {
+          return ctrl.isServicesLoading.value ? _buildLoadingField('Loading services...') : _buildServicesDropdown(context, ctrl);
+        }),
+      ],
+    );
+  }
+
+  Widget _buildServicesDropdown(BuildContext context, RegisterCtrl ctrl) {
+    return TextFormField(
+      readOnly: true,
+      controller: TextEditingController(text: ctrl.selectedServiceName.value),
+      onTap: () => _showSelectionBottomSheet(
+        context,
+        ctrl,
+        'Select Medical Service',
+        ctrl.services,
+        ctrl.selectedService.value.isNotEmpty ? {"_id": ctrl.selectedService.value, "name": ctrl.selectedServiceName.value} : null,
+        ctrl.setSelectedService,
+        'service',
+      ),
+      decoration: InputDecoration(
+        hintText: 'Select your medical service',
+        hintStyle: GoogleFonts.inter(color: AppTheme.textLight, fontWeight: FontWeight.w400),
+        prefixIcon: Icon(Icons.work_rounded, color: AppTheme.textSecondary, size: 22),
         suffixIcon: Icon(Icons.arrow_drop_down_rounded, color: AppTheme.textSecondary, size: 22),
         filled: true,
         fillColor: AppTheme.backgroundWhite,
@@ -740,7 +826,7 @@ class Register extends StatelessWidget {
     );
   }
 
-  void _showServicesSelection(BuildContext context, RegisterCtrl ctrl) {
+  void _showSelectionBottomSheet(BuildContext context, RegisterCtrl ctrl, String title, List<dynamic> items, dynamic selectedItem, Function(dynamic) onSelectionChanged, String type) {
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
@@ -748,13 +834,7 @@ class Register extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (context) => ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        child: ServiceSelectionUI(
-          title: 'Select Medical Specialise',
-          items: ctrl.specialities,
-          selectedItems: {"_id": ctrl.selectedSpecialty.value, "name": ctrl.selectedSpecialtyName.value},
-          onSelectionChanged: ctrl.setSelectedSpecialty,
-          itemType: 'services',
-        ),
+        child: ServiceSelectionUI(title: title, items: items, selectedItems: selectedItem, onSelectionChanged: onSelectionChanged, itemType: type),
       ),
     );
   }

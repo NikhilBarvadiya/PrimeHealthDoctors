@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:prime_health_doctors/utils/theme/light.dart';
 import 'package:prime_health_doctors/views/dashboard/profile/profile_ctrl.dart';
 
@@ -287,23 +288,9 @@ class _SlotsManagementState extends State<SlotsManagement> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      '${ctrl.formatSlotTime(slot['startTime'])} - ${ctrl.formatSlotTime(slot['endTime'])}',
-                      style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
-                    ),
-                    const SizedBox(width: 8),
-                    if (ctrl.isRecurringSlot(slot))
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(color: AppTheme.accentGreen.withOpacity(0.1), borderRadius: BorderRadius.circular(4)),
-                        child: Text(
-                          'Recurring',
-                          style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: AppTheme.accentGreen),
-                        ),
-                      ),
-                  ],
+                Text(
+                  '${ctrl.formatSlotTime(slot['startTime'])} - ${ctrl.formatSlotTime(slot['endTime'])}',
+                  style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
                 ),
                 const SizedBox(height: 4),
                 Text('Date: ${ctrl.formatSlotDate(slot['startTime'])}', style: GoogleFonts.inter(fontSize: 13, color: AppTheme.textSecondary)),
@@ -312,9 +299,22 @@ class _SlotsManagementState extends State<SlotsManagement> {
               ],
             ),
           ),
-          IconButton(
-            onPressed: () => _showDeleteSlotDialog(index),
-            icon: Icon(Icons.delete, color: Colors.red),
+          Column(
+            children: [
+              if (ctrl.isRecurringSlot(slot))
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(color: AppTheme.accentGreen.withOpacity(0.1), borderRadius: BorderRadius.circular(4)),
+                  child: Text(
+                    'Recurring',
+                    style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: AppTheme.accentGreen),
+                  ),
+                ),
+              IconButton(
+                onPressed: () => _showDeleteSlotDialog(index),
+                icon: Icon(Icons.delete, color: Colors.red),
+              ),
+            ],
           ),
         ],
       ),
@@ -454,11 +454,10 @@ class _SlotsManagementState extends State<SlotsManagement> {
   }
 
   void _showAddSlotDialog() {
-    final startTime = TimeOfDay.now();
-    final endTime = TimeOfDay(hour: startTime.hour + 1, minute: startTime.minute);
-    final selectedDate = DateTime.now();
+    var startTime = TimeOfDay.now();
+    var endTime = TimeOfDay(hour: startTime.hour + 1, minute: startTime.minute);
+    DateTime selectedDate = DateTime.now();
     var isRecurring = true;
-
     Get.dialog(
       Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -480,9 +479,11 @@ class _SlotsManagementState extends State<SlotsManagement> {
                     style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
                   ),
                   const SizedBox(height: 20),
-                  _buildTimePicker('Start Time', startTime, (time) {}),
+                  _buildDatePicker('Date', selectedDate, (date) => setState(() => selectedDate = date)),
                   const SizedBox(height: 16),
-                  _buildTimePicker('End Time', endTime, (time) {}),
+                  _buildTimePicker('Start Time', startTime, (time) => setState(() => startTime = time)),
+                  const SizedBox(height: 16),
+                  _buildTimePicker('End Time', endTime, (time) => setState(() => endTime = time)),
                   const SizedBox(height: 16),
                   Row(
                     children: [
@@ -599,6 +600,61 @@ class _SlotsManagementState extends State<SlotsManagement> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildDatePicker(String label, DateTime date, Function(DateTime) onDateChanged) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+        ),
+        const SizedBox(height: 8),
+        InkWell(
+          onTap: () async {
+            final DateTime now = DateTime.now();
+            final DateTime? picked = await showDatePicker(
+              context: context,
+              initialDate: date,
+              firstDate: now,
+              lastDate: DateTime(now.year + 1, now.month, now.day),
+              builder: (context, child) {
+                return Theme(
+                  data: ThemeData.light().copyWith(
+                    primaryColor: AppTheme.primaryBlue,
+                    colorScheme: ColorScheme.light(primary: AppTheme.primaryBlue),
+                    buttonTheme: const ButtonThemeData(textTheme: ButtonTextTheme.primary),
+                  ),
+                  child: child!,
+                );
+              },
+            );
+            if (picked != null) {
+              onDateChanged(picked);
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppTheme.backgroundWhite,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppTheme.borderColor),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  DateFormat('MMM dd, yyyy').format(date),
+                  style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w500, color: AppTheme.textPrimary),
+                ),
+                Icon(Icons.access_time_rounded, color: AppTheme.textLight),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 

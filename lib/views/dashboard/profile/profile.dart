@@ -198,13 +198,75 @@ class Profile extends StatelessWidget {
             _buildEditField('Email Address', ctrl.emailController, Icons.email_rounded, isEmail: true),
             _buildEditField('Mobile Number', ctrl.mobileController, Icons.phone_rounded, isPhone: true),
             _buildEditField('License Number', ctrl.licenseController, Icons.badge_rounded),
+            _buildServiceField(ctrl, context),
             _buildSpecialtyField(ctrl, context),
           ] else ...[
             _buildInfoTile(Icons.phone_rounded, 'Mobile', ctrl.user.value.mobile),
             _buildInfoTile(Icons.badge_rounded, 'License', ctrl.user.value.license),
+            _buildInfoTile(Icons.work_rounded, 'Service', ctrl.selectedServiceName.value),
             _buildInfoTile(Icons.medical_services_rounded, 'Specialty', ctrl.selectedSpecialtyName.value),
           ],
         ],
+      ),
+    );
+  }
+
+  Widget _buildServiceField(ProfileCtrl ctrl, BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(color: AppTheme.primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+            child: Icon(Icons.work_rounded, color: AppTheme.primaryBlue, size: 20),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Medical Service',
+                  style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary, fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 6),
+                Obx(() {
+                  return ctrl.isServicesLoading.value ? _buildLoadingField('Loading services...') : _buildServiceDropdown(context, ctrl);
+                }),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildServiceDropdown(BuildContext context, ProfileCtrl ctrl) {
+    return TextFormField(
+      readOnly: true,
+      controller: TextEditingController(text: ctrl.selectedServiceName.value),
+      onTap: () => _showServiceSelection(context, ctrl),
+      decoration: InputDecoration(
+        hintText: 'Select your medical service',
+        hintStyle: GoogleFonts.inter(color: AppTheme.textLight, fontWeight: FontWeight.w400),
+        suffixIcon: Icon(Icons.arrow_drop_down_rounded, color: AppTheme.textSecondary, size: 22),
+        filled: true,
+        fillColor: AppTheme.backgroundWhite,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.transparent),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppTheme.borderColor),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppTheme.primaryBlue, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
     );
   }
@@ -902,6 +964,25 @@ class Profile extends StatelessWidget {
             const SizedBox(width: 12),
             Text(message, style: GoogleFonts.inter(fontSize: 14, color: AppTheme.textSecondary)),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _showServiceSelection(BuildContext context, ProfileCtrl ctrl) {
+    showModalBottomSheet(
+      context: context,
+      useSafeArea: true,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        child: ServiceSelectionUI(
+          title: 'Select Medical Service',
+          items: ctrl.services,
+          selectedItems: {"_id": ctrl.selectedService.value, "name": ctrl.selectedServiceName.value},
+          onSelectionChanged: ctrl.setSelectedService,
+          itemType: 'service',
         ),
       ),
     );

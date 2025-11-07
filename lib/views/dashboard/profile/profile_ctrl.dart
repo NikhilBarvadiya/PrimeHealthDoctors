@@ -15,6 +15,7 @@ import 'package:prime_health_doctors/views/dashboard/home/home_ctrl.dart';
 class ProfileCtrl extends GetxController {
   var user = UserModel().obs;
   var isLoading = false.obs, isSpecialtyLoading = false.obs, isLoadingSlots = false.obs, hasMoreSlots = true.obs;
+  var isServicesLoading = false.obs;
   bool isEditMode = false;
 
   var avatar = Rx<File?>(null), logo = Rx<File?>(null);
@@ -29,8 +30,9 @@ class ProfileCtrl extends GetxController {
   final TextEditingController consultationFeeController = TextEditingController();
   final TextEditingController followUpFeeController = TextEditingController();
 
-  var specialities = <dynamic>[].obs;
+  var services = <dynamic>[].obs, specialities = <dynamic>[].obs;
   var selectedSpecialty = ''.obs, selectedSpecialtyName = ''.obs;
+  var selectedService = ''.obs, selectedServiceName = ''.obs;
   var certifications = <Map<String, dynamic>>[].obs, slots = <Map<String, dynamic>>[].obs;
   var currentPage = 1.obs;
   var startDate = Rx<DateTime?>(null), endDate = Rx<DateTime?>(null);
@@ -41,6 +43,7 @@ class ProfileCtrl extends GetxController {
   void onInit() {
     loadUserData();
     loadSpecialities();
+    loadServices();
     super.onInit();
   }
 
@@ -49,14 +52,6 @@ class ProfileCtrl extends GetxController {
     try {
       final profileData = await authService.getProfile();
       if (profileData != null && profileData['doctor'] != null) {
-        final data = await authService.getSpecialities();
-        if (data.isNotEmpty) {
-          int index = data.indexWhere((e) => e["_id"].toString() == profileData['doctor']['specialty'].toString());
-          if (index != -1) {
-            selectedSpecialty.value = data[index]["_id"] ?? '';
-            selectedSpecialtyName.value = data[index]["name"] ?? '';
-          }
-        }
         _updateUserFromApi(profileData['doctor']);
       }
       _updateControllers();
@@ -67,14 +62,31 @@ class ProfileCtrl extends GetxController {
     }
   }
 
+  Future<void> loadServices() async {
+    isServicesLoading.value = true;
+    try {
+      final data = await authService.getServices();
+      services.assignAll(data);
+    } finally {
+      isServicesLoading.value = false;
+    }
+  }
+
   Future<void> loadSpecialities() async {
     isSpecialtyLoading.value = true;
     try {
-      final data = await authService.getSpecialities();
+      final data = await authService.getSpecialities("");
       specialities.assignAll(data);
     } finally {
       isSpecialtyLoading.value = false;
     }
+  }
+
+  void setSelectedService(dynamic service) {
+    if (service == null) return;
+    selectedService.value = service["_id"] ?? '';
+    selectedServiceName.value = service["name"] ?? '';
+    update();
   }
 
   Future<void> loadSlots({bool loadMore = false, bool refresh = false}) async {
@@ -144,11 +156,11 @@ class ProfileCtrl extends GetxController {
   }
 
   deleteSlots(int index) async {
+    await authService.deleteSlot({"slotId": slots[index]["_id"]});
     slots.removeAt(index);
-    await authService.manageSlots(slots[index]["_id"]);
   }
 
-  void _updateUserFromApi(Map<String, dynamic> data) {
+  Future<void> _updateUserFromApi(Map<String, dynamic> data) async {
     user.value = UserModel(
       id: data['_id']?.toString() ?? '',
       name: data['name'] ?? '',
@@ -156,6 +168,7 @@ class ProfileCtrl extends GetxController {
       mobile: data['mobileNo'] ?? '',
       license: data['license'] ?? '',
       specialty: data['specialty']?.toString() ?? '',
+      services: data['services']?["_id"]?.toString() ?? '',
       bio: data['bio'] ?? '',
       profileImage: data['profileImage'] ?? '',
       logo: data['logo'] ?? '',
@@ -164,6 +177,18 @@ class ProfileCtrl extends GetxController {
       isActive: data['isActive'] ?? true,
       createdAt: data['createdAt'] != null ? DateTime.parse(data['createdAt']) : DateTime.now(),
     );
+    selectedService.value = data['services']?["_id"] ?? '';
+    selectedServiceName.value = data['services']?["name"] ?? '';
+    if(selectedService.value.isNotEmpty) {
+      final getSpecialities = await authService.getSpecialities(selectedService.value);
+      if (getSpecialities.isNotEmpty) {
+        int index = getSpecialities.indexWhere((e) => e["_id"].toString() == data['specialty'].toString());
+        if (index != -1) {
+          selectedSpecialty.value = getSpecialities[index]["_id"] ?? '';
+          selectedSpecialtyName.value = getSpecialities[index]["name"] ?? '';
+        }
+      }
+    }
     certifications.assignAll(
       user.value.certifications.map((cert) => {'name': cert.name, 'issuedBy': cert.issuedBy, 'issueDate': cert.issueDate.toIso8601String().split('T')[0], 'document': cert.document}).toList(),
     );
@@ -268,23 +293,33 @@ class ProfileCtrl extends GetxController {
     if (_validateForm()) {
       isLoading.value = true;
       try {
+        final certs = certifications.map((cert) {
+          final Map<String, dynamic> map = {'name': cert['name']?.toString() ?? '', 'issuedBy': cert['issuedBy']?.toString() ?? '', 'issueDate': cert['issueDate']?.toString() ?? ''};
+          final document = cert['document']?.toString();
+          if (document != null && document.isNotEmpty) {
+            map['document'] = document;
+          }
+          return map;
+        }).toList();
         Map<String, dynamic> json = {
           'name': nameController.text.trim(),
           'email': emailController.text.trim(),
           'mobileNo': mobileController.text.trim(),
           'license': licenseController.text.trim(),
           'specialty': selectedSpecialty.value,
+          'services': selectedService.value,
           'bio': bioController.text.trim(),
+          "certifications": certs,
           'pricing': {'consultationFee': int.tryParse(consultationFeeController.text) ?? 500, 'followUpFee': int.tryParse(followUpFeeController.text) ?? 300},
         };
         final formData = dio.FormData.fromMap(json);
-        final certs = certifications.map((cert) => {'name': cert['name'], 'issuedBy': cert['issuedBy'], 'issueDate': cert['issueDate'], 'document': cert['document']}).toList();
-        if (certs.isNotEmpty) {
-          formData.fields.add(MapEntry('certifications', certs.toString()));
+        if (certificationDocuments.isNotEmpty) {
+          certificationDocuments.forEach((index, file) async {
+            if (file.path.isNotEmpty) {
+              formData.files.add(MapEntry('certificate', await dio.MultipartFile.fromFile(file.path, filename: 'cert_$index.pdf')));
+            }
+          });
         }
-        certificationDocuments.forEach((index, file) async {
-          formData.files.add(MapEntry('certificate', await dio.MultipartFile.fromFile(file.path, filename: 'cert_$index.pdf')));
-        });
         final success = await authService.updateProfile(formData);
         if (success) {
           await loadUserData();
@@ -303,7 +338,7 @@ class ProfileCtrl extends GetxController {
   }
 
   bool _validateForm() {
-    if (nameController.text.isEmpty || emailController.text.isEmpty || mobileController.text.isEmpty || licenseController.text.isEmpty || selectedSpecialty.isEmpty) {
+    if (nameController.text.isEmpty || emailController.text.isEmpty || mobileController.text.isEmpty || licenseController.text.isEmpty || selectedSpecialty.isEmpty || selectedService.isEmpty) {
       toaster.warning('Please fill all required fields');
       return false;
     }

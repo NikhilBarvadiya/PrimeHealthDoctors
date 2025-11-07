@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/material.dart';
 import 'package:prime_health_doctors/models/appointment_model.dart';
@@ -7,7 +6,6 @@ import 'package:prime_health_doctors/models/calling_model.dart';
 import 'package:prime_health_doctors/models/user_model.dart';
 import 'package:prime_health_doctors/service/agora_service.dart';
 import 'package:prime_health_doctors/service/calling_init_method.dart';
-import 'package:prime_health_doctors/service/calling_service.dart';
 
 class CallingView extends StatefulWidget {
   final String channelName;
@@ -26,7 +24,7 @@ class _CallingViewState extends State<CallingView> with TickerProviderStateMixin
   int? _remoteUid;
   bool _isLoading = true, _showControls = true;
   Timer? _hideControlsTimer;
-  DateTime? _startTime;
+  // DateTime? _startTime;
 
   late AnimationController _controlsAnimationCtrl, _loadingAnimationCtrl, _pulseAnimationCtrl, _avatarPulseCtrl;
   late Animation<double> _controlsAnimation, _pulseAnimation, _avatarPulseAnimation;
@@ -34,7 +32,7 @@ class _CallingViewState extends State<CallingView> with TickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-    _startTime = DateTime.now();
+    // _startTime = DateTime.now();
     _controlsAnimationCtrl = AnimationController(duration: const Duration(milliseconds: 300), vsync: this);
     _loadingAnimationCtrl = AnimationController(duration: const Duration(milliseconds: 1500), vsync: this)..repeat(reverse: true);
     _pulseAnimationCtrl = AnimationController(duration: const Duration(milliseconds: 2000), vsync: this)..repeat(reverse: true);
@@ -648,39 +646,39 @@ class _CallingViewState extends State<CallingView> with TickerProviderStateMixin
   }
 
   void _endCall() async {
-    if (widget.receiver.fcmToken.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Receiver FCM token is missing!')));
-      return;
-    }
-    final endTime = DateTime.now();
-    final duration = _startTime != null ? endTime.difference(_startTime!).inSeconds : 0;
-    CallData callData = CallData(
-      senderId: widget.sender.id,
-      senderName: widget.sender.name,
-      senderFCMToken: "",
-      callType: widget.callType,
-      status: CallStatus.ended,
-      channelName: widget.channelName,
-    );
-    await _callService.leaveChannel();
-    CallingService().closeNotification(widget.receiver.id.hashCode);
-    CallingService().makeCall(widget.receiver.fcmToken, callData);
-    final callPayload = {
-      "userIds": [widget.sender.id, widget.receiver.id],
-      "videoCallData": {
-        "callType": widget.callType == CallType.video ? "video" : "voice",
-        "channelName": widget.channelName,
-        "status": "ended",
-        "startTime": _startTime?.toIso8601String(),
-        "endTime": endTime.toIso8601String(),
-        "duration": duration,
-        "senderId": widget.sender.id,
-        "senderName": widget.sender.name,
-        "receiverId": widget.receiver.id,
-        "receiverName": widget.receiver.patientName,
-      },
-    };
-    log("End Calling Req.---->$callPayload");
+    // if (widget.receiver.fcmToken.isEmpty) {
+    //   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Receiver FCM token is missing!')));
+    //   return;
+    // }
+    // final endTime = DateTime.now();
+    // final duration = _startTime != null ? endTime.difference(_startTime!).inSeconds : 0;
+    // CallData callData = CallData(
+    //   senderId: widget.sender.id,
+    //   senderName: widget.sender.name,
+    //   senderFCMToken: "",
+    //   callType: widget.callType,
+    //   status: CallStatus.ended,
+    //   channelName: widget.channelName,
+    // );
+    // await _callService.leaveChannel();
+    // CallingService().closeNotification(widget.receiver.id.hashCode);
+    // CallingService().makeCall(widget.receiver.fcmToken, callData);
+    // final callPayload = {
+    //   "userIds": [widget.sender.id, widget.receiver.id],
+    //   "videoCallData": {
+    //     "callType": widget.callType == CallType.video ? "video" : "voice",
+    //     "channelName": widget.channelName,
+    //     "status": "ended",
+    //     "startTime": _startTime?.toIso8601String(),
+    //     "endTime": endTime.toIso8601String(),
+    //     "duration": duration,
+    //     "senderId": widget.sender.id,
+    //     "senderName": widget.sender.name,
+    //     "receiverId": widget.receiver.id,
+    //     "receiverName": widget.receiver.patientName,
+    //   },
+    // };
+    // log("End Calling Req.---->$callPayload");
     // await ApiManager.request(endpoint: ApiConstant.storeVideoCall, data: callPayload);
     if (mounted) Navigator.pop(context);
   }

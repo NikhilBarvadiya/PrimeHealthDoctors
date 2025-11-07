@@ -9,9 +9,23 @@ import 'package:prime_health_doctors/utils/toaster.dart';
 class AuthService extends GetxService {
   Future<AuthService> init() async => this;
 
-  Future<List<dynamic>> getSpecialities() async {
+  Future<List<dynamic>> getServices() async {
     try {
-      final response = await ApiManager().call(APIIndex.specialities, {}, ApiType.post);
+      final response = await ApiManager().call(APIIndex.getServices, {}, ApiType.post);
+      if (response.status != 200 || response.data == null) {
+        toaster.warning(response.message ?? 'Failed to load services');
+        return [];
+      }
+      return response.data['services'] ?? [];
+    } catch (err) {
+      toaster.error('Network error: ${err.toString()}');
+      return [];
+    }
+  }
+
+  Future<List<dynamic>> getSpecialities(String serviceId) async {
+    try {
+      final response = await ApiManager().call(APIIndex.specialities, {"serviceId": serviceId}, ApiType.post);
       if (response.status != 200 || response.data == null) {
         toaster.warning(response.message ?? 'Failed to load specialities');
         return [];
@@ -29,10 +43,6 @@ class AuthService extends GetxService {
       if (response.status != 200) {
         toaster.warning(response.message ?? 'Registration failed');
         return false;
-      }
-      if (response.data?['accessToken'] != null) {
-        await write(AppSession.token, response.data!["accessToken"]);
-        await write(AppSession.userData, response.data!["doctor"]);
       }
       toaster.success(response.message ?? 'Registration successful!');
       return true;
@@ -165,7 +175,7 @@ class AuthService extends GetxService {
 
   Future<bool> deleteSlot(Map<String, dynamic> request) async {
     try {
-      final response = await ApiManager().call(APIIndex.manageSlots, request, ApiType.post);
+      final response = await ApiManager().call(APIIndex.deleteSlots, request, ApiType.post);
       if (response.status == 200) {
         toaster.success(response.message ?? 'Slots updated successfully');
         return true;
@@ -176,6 +186,36 @@ class AuthService extends GetxService {
     } catch (err) {
       toaster.error('Slots update failed: ${err.toString()}');
       return false;
+    }
+  }
+
+  Future<dynamic> bookings(Map<String, dynamic> request) async {
+    try {
+      final response = await ApiManager().call(APIIndex.bookings, request, ApiType.post);
+      if (response.status == 200 && response.data != null) {
+        return response.data;
+      } else {
+        toaster.warning(response.message ?? 'Failed to load bookings');
+        return [];
+      }
+    } catch (err) {
+      toaster.error('Bookings loading failed: ${err.toString()}');
+      return [];
+    }
+  }
+
+  Future<Map<String, dynamic>?> updateBookingStatus(Map<String, dynamic> request) async {
+    try {
+      final response = await ApiManager().call(APIIndex.updateBookingStatus, request, ApiType.post);
+      if (response.status == 200 && response.data != null) {
+        return response.data;
+      } else {
+        toaster.warning(response.message ?? 'Failed to update appointment status');
+        return null;
+      }
+    } catch (err) {
+      toaster.error('Status update failed: ${err.toString()}');
+      return null;
     }
   }
 }

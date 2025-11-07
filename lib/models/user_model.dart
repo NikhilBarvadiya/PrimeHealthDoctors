@@ -5,6 +5,7 @@ class UserModel {
   String mobile;
   String license;
   String specialty;
+  String services;
   String bio;
   String profileImage;
   String logo;
@@ -20,6 +21,7 @@ class UserModel {
     this.mobile = '',
     this.license = '',
     this.specialty = '',
+    this.services = '',
     this.bio = '',
     this.profileImage = '',
     this.logo = '',
@@ -39,6 +41,7 @@ class UserModel {
       mobile: json['mobileNo'] ?? '',
       license: json['license'] ?? '',
       specialty: json['specialty'] is Map ? json['specialty']['name'] ?? '' : json['specialty']?.toString() ?? '',
+      services: json['services'] is Map ? json['services']['name'] ?? '' : json['services']?.toString() ?? '',
       bio: json['bio'] ?? '',
       profileImage: json['profileImage'] ?? '',
       logo: json['logo'] ?? '',
@@ -56,6 +59,7 @@ class UserModel {
       'mobileNo': mobile,
       'license': license,
       'specialty': specialty,
+      'services': services,
       'bio': bio,
       'profileImage': profileImage,
       'logo': logo,

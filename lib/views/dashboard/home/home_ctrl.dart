@@ -1,252 +1,62 @@
 import 'package:get/get.dart';
-import 'package:prime_health_doctors/main.dart';
 import 'package:prime_health_doctors/models/appointment_model.dart';
 import 'package:prime_health_doctors/utils/config/session.dart';
 import 'package:prime_health_doctors/utils/storage.dart';
+import 'package:prime_health_doctors/views/auth/auth_service.dart';
 
 class HomeCtrl extends GetxController {
-  var userName = ''.obs;
+  var userName = 'Dr. John Smith'.obs;
+  var todayAppointments = <AppointmentModel>[].obs;
+  var isLoading = false.obs;
 
-  var appointmentsList = <AppointmentModel>[
-    AppointmentModel(
-      id: '7',
-      patientName: 'Alice Johnson',
-      patientEmail: 'alice.johnson@email.com',
-      patientPhone: '+91 98765 43216',
-      patientAvatar: '',
-      date: '2025-10-03',
-      time: '09:00 AM',
-      service: 'Orthopedics Consultation',
-      serviceType: 'Specialist Consultation',
-      notes: 'Sports injury rehabilitation',
-      duration: '45 mins',
-      consultationFee: 1200.0,
-      paymentStatus: 'paid',
-      status: 'confirmed',
-      createdAt: DateTime(2025, 9, 28),
-      isUrgent: false,
-      patientAge: '32',
-      patientGender: 'Female',
-      medicalHistory: 'ACL reconstruction surgery',
-      fcmToken: localFCMToken,
-    ),
-    AppointmentModel(
-      id: '8',
-      patientName: 'Bob Smith',
-      patientEmail: 'bob.smith@email.com',
-      patientPhone: '+91 98765 43217',
-      patientAvatar: '',
-      date: '2025-10-03',
-      time: '10:30 AM',
-      service: 'Neurology Consultation',
-      serviceType: 'Specialist Consultation',
-      notes: 'Memory and cognitive assessment',
-      duration: '60 mins',
-      consultationFee: 1800.0,
-      paymentStatus: 'pending',
-      status: 'pending',
-      createdAt: DateTime(2025, 9, 29),
-      isUrgent: false,
-      patientAge: '67',
-      patientGender: 'Male',
-      medicalHistory: 'Mild cognitive impairment',
-      fcmToken: localFCMToken,
-    ),
-    AppointmentModel(
-      id: '9',
-      patientName: 'Charlie Davis',
-      patientEmail: 'charlie.davis@email.com',
-      patientPhone: '+91 98765 43218',
-      patientAvatar: '',
-      date: '2025-10-04',
-      time: '11:45 AM',
-      service: 'Sports Medicine',
-      serviceType: 'Therapy',
-      notes: 'Athletic performance enhancement',
-      duration: '60 mins',
-      consultationFee: 1500.0,
-      paymentStatus: 'paid',
-      status: 'confirmed',
-      createdAt: DateTime(2025, 9, 25),
-      isUrgent: false,
-      patientAge: '25',
-      patientGender: 'Male',
-      medicalHistory: 'Professional athlete - regular checkups',
-      fcmToken: localFCMToken,
-    ),
-    AppointmentModel(
-      id: '10',
-      patientName: 'Dana Evans',
-      patientEmail: 'dana.evans@email.com',
-      patientPhone: '+91 98765 43219',
-      patientAvatar: '',
-      date: '2025-10-04',
-      time: '02:00 PM',
-      service: 'Maternity Care',
-      serviceType: 'Specialist Consultation',
-      notes: 'Prenatal checkup - 6th month',
-      duration: '30 mins',
-      consultationFee: 1000.0,
-      paymentStatus: 'pending',
-      status: 'cancelled',
-      createdAt: DateTime(2025, 9, 20),
-      isUrgent: false,
-      patientAge: '31',
-      patientGender: 'Female',
-      medicalHistory: 'First pregnancy, no complications',
-      fcmToken: localFCMToken,
-    ),
-    AppointmentModel(
-      id: '11',
-      patientName: 'Eve Franklin',
-      patientEmail: 'eve.franklin@email.com',
-      patientPhone: '+91 98765 43220',
-      patientAvatar: '',
-      date: '2025-10-05',
-      time: '03:15 PM',
-      service: 'Physical Therapy',
-      serviceType: 'Therapy',
-      notes: 'Post-injury mobility training',
-      duration: '45 mins',
-      consultationFee: 800.0,
-      paymentStatus: 'paid',
-      status: 'confirmed',
-      createdAt: DateTime(2025, 9, 22),
-      isUrgent: false,
-      patientAge: '42',
-      patientGender: 'Female',
-      medicalHistory: 'Rotator cuff injury recovery',
-      fcmToken: localFCMToken,
-    ),
-    AppointmentModel(
-      id: '12',
-      patientName: 'Frank Green',
-      patientEmail: 'frank.green@email.com',
-      patientPhone: '+91 98765 43221',
-      patientAvatar: '',
-      date: '2025-10-05',
-      time: '04:30 PM',
-      service: 'Geriatric Care',
-      serviceType: 'Primary Care',
-      notes: 'Comprehensive senior health assessment',
-      duration: '60 mins',
-      consultationFee: 900.0,
-      paymentStatus: 'pending',
-      status: 'pending',
-      createdAt: DateTime(2025, 9, 18),
-      isUrgent: false,
-      patientAge: '74',
-      patientGender: 'Male',
-      medicalHistory: 'Hypertension, Arthritis, Osteoporosis',
-      fcmToken: localFCMToken,
-    ),
-    AppointmentModel(
-      id: '13',
-      patientName: 'Grace Harris',
-      patientEmail: 'grace.harris@email.com',
-      patientPhone: '+91 98765 43222',
-      patientAvatar: '',
-      date: '2025-10-06',
-      time: '05:45 PM',
-      service: 'Pediatric Care',
-      serviceType: 'Specialist Consultation',
-      notes: 'Child development milestone check',
-      duration: '30 mins',
-      consultationFee: 1100.0,
-      paymentStatus: 'paid',
-      status: 'completed',
-      createdAt: DateTime(2025, 9, 15),
-      isUrgent: false,
-      patientAge: '4',
-      patientGender: 'Female',
-      medicalHistory: 'Healthy development, no concerns',
-      fcmToken: localFCMToken,
-    ),
-    AppointmentModel(
-      id: '14',
-      patientName: 'Henry Irving',
-      patientEmail: 'henry.irving@email.com',
-      patientPhone: '+91 98765 43223',
-      patientAvatar: '',
-      date: '2025-10-06',
-      time: '07:00 PM',
-      service: 'Pain Management',
-      serviceType: 'Therapy',
-      notes: 'Chronic back pain treatment plan',
-      duration: '45 mins',
-      consultationFee: 1300.0,
-      paymentStatus: 'paid',
-      status: 'confirmed',
-      createdAt: DateTime(2025, 9, 10),
-      isUrgent: true,
-      patientAge: '58',
-      patientGender: 'Male',
-      medicalHistory: 'Chronic lower back pain, Disc herniation',
-      fcmToken: localFCMToken,
-    ),
-    AppointmentModel(
-      id: '15',
-      patientName: 'Isabella James',
-      patientEmail: 'isabella.james@email.com',
-      patientPhone: '+91 98765 43224',
-      patientAvatar: '',
-      date: '2025-10-07',
-      time: '08:30 AM',
-      service: 'Orthopedics Consultation',
-      serviceType: 'Specialist Consultation',
-      notes: 'Fracture follow-up and physiotherapy',
-      duration: '30 mins',
-      consultationFee: 1200.0,
-      paymentStatus: 'pending',
-      status: 'pending',
-      createdAt: DateTime(2025, 9, 5),
-      isUrgent: false,
-      patientAge: '28',
-      patientGender: 'Female',
-      medicalHistory: 'Wrist fracture - cast removal scheduled',
-      fcmToken: localFCMToken,
-    ),
-    AppointmentModel(
-      id: '16',
-      patientName: 'Jack King',
-      patientEmail: 'jack.king@email.com',
-      patientPhone: '+91 98765 43225',
-      patientAvatar: '',
-      date: '2025-10-07',
-      time: '01:00 PM',
-      service: 'Sports Medicine',
-      serviceType: 'Therapy',
-      notes: 'Return to sport clearance assessment',
-      duration: '45 mins',
-      consultationFee: 1500.0,
-      paymentStatus: 'paid',
-      status: 'completed',
-      createdAt: DateTime(2025, 9, 1),
-      isUrgent: false,
-      patientAge: '22',
-      patientGender: 'Male',
-      medicalHistory: 'Ankle sprain recovery - final assessment',
-      fcmToken: localFCMToken,
-    ),
-  ].obs;
-
-  var filteredAppointments = <AppointmentModel>[].obs;
+  AuthService get authService => Get.find<AuthService>();
 
   @override
   void onInit() {
     super.onInit();
-    filteredAppointments.assignAll(appointmentsList);
     loadUserData();
+    loadTodayAppointments();
   }
 
   void loadUserData() async {
     try {
       final userData = await read(AppSession.userData);
       if (userData != null) {
-        userName.value = userData['name'] ?? userData['clinic'] ?? "Dr. John Smith";
+        userName.value = userData['name'] ?? "Dr. John Smith";
       }
     } catch (e) {
       Get.snackbar('Error', 'Failed to load user data: $e', snackPosition: SnackPosition.BOTTOM);
     }
+  }
+
+  Future<void> loadTodayAppointments() async {
+    try {
+      isLoading.value = true;
+      final now = DateTime.now();
+      final todayDate = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+      final response = await authService.bookings({"page": 1, "limit": 10, "startDate": todayDate, "endDate": todayDate});
+      if (response != null && response['docs'] != null) {
+        final List<dynamic> data = response['docs'];
+        final todayApps = data.map((item) => AppointmentModel.fromMap(item)).toList();
+        todayAppointments.assignAll(todayApps);
+      } else {
+        todayAppointments.clear();
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to load appointment data: $e', snackPosition: SnackPosition.BOTTOM);
+      todayAppointments.clear();
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  int get todayAppointmentsCount {
+    return todayAppointments.length;
+  }
+
+  List<AppointmentModel> get upcomingAppointments {
+    return todayAppointments.where((appointment) {
+      return appointment.status != 'completed' && appointment.status != 'cancelled';
+    }).toList();
   }
 }

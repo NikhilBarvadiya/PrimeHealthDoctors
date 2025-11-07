@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:prime_health_doctors/utils/decoration.dart';
+import 'package:prime_health_doctors/views/dashboard/home/appointments/appointments.dart';
 import 'package:prime_health_doctors/views/dashboard/home/home.dart';
 import 'package:prime_health_doctors/views/dashboard/profile/profile.dart';
-import 'package:prime_health_doctors/views/dashboard/services/services.dart';
 import 'dashboard_ctrl.dart';
 
 class Dashboard extends StatelessWidget {
@@ -18,7 +18,7 @@ class Dashboard extends StatelessWidget {
           canPop: false,
           child: Obx(
             () => Scaffold(
-              body: IndexedStack(index: ctrl.currentIndex.value, children: [Home(), Services(), Profile()]),
+              body: IndexedStack(index: ctrl.currentIndex.value, children: [Home(), Appointments(), Profile()]),
               bottomNavigationBar: Container(
                 decoration: BoxDecoration(
                   boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: Offset(0, -5))],
@@ -34,7 +34,7 @@ class Dashboard extends StatelessWidget {
                   selectedLabelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
                   items: [
                     BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Home'),
-                    BottomNavigationBarItem(icon: Icon(Icons.medical_services_outlined), activeIcon: Icon(Icons.medical_services), label: 'Services'),
+                    BottomNavigationBarItem(icon: Icon(Icons.calendar_today_outlined), activeIcon: Icon(Icons.medical_services), label: 'Appointment'),
                     BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: 'Profile'),
                   ],
                 ),

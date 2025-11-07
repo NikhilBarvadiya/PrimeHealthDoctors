@@ -1,167 +1,154 @@
 class AppointmentModel {
   final String id;
+  final String bookingId;
+  final String patientId;
   final String patientName;
-  final String patientEmail;
-  final String patientPhone;
-  final String patientAvatar;
-  final String date;
-  final String time;
-  final String service;
-  final String serviceType;
-  final String notes;
-  final String duration;
-  final double consultationFee;
+  final String? patientEmail;
+  final String? patientPhone;
+  final String? patientAvatar;
+  final DateTime appointmentDate;
+  final String appointmentTime;
+  final String? serviceName;
+  final String? serviceId;
+  final String? doctorId;
+  final String consultationType;
+  final String? notes;
+  final String? duration;
+  final double amount;
   final String paymentStatus;
   String status;
   final DateTime createdAt;
   final bool isUrgent;
-  final String patientAge;
-  final String patientGender;
-  final String medicalHistory;
-  final String fcmToken;
+  final String? patientAge;
+  final String? patientGender;
+  final String? medicalHistory;
+  final String? fcmToken;
 
   AppointmentModel({
     required this.id,
+    required this.bookingId,
+    required this.patientId,
     required this.patientName,
-    required this.patientEmail,
-    required this.patientPhone,
-    required this.patientAvatar,
-    required this.date,
-    required this.time,
-    required this.service,
-    required this.serviceType,
-    required this.notes,
-    required this.duration,
-    required this.consultationFee,
+    this.patientEmail,
+    this.patientPhone,
+    this.patientAvatar,
+    required this.appointmentDate,
+    required this.appointmentTime,
+    this.serviceName,
+    this.serviceId,
+    this.doctorId,
+    required this.consultationType,
+    this.notes,
+    this.duration,
+    required this.amount,
     required this.paymentStatus,
     required this.status,
     required this.createdAt,
     this.isUrgent = false,
-    required this.patientAge,
-    required this.patientGender,
-    required this.medicalHistory,
-    required this.fcmToken,
+    this.patientAge,
+    this.patientGender,
+    this.medicalHistory,
+    this.fcmToken,
   });
 
-  AppointmentModel copyWith({
-    String? id,
-    String? patientName,
-    String? patientEmail,
-    String? patientPhone,
-    String? patientAvatar,
-    String? date,
-    String? time,
-    String? service,
-    String? serviceType,
-    String? notes,
-    String? duration,
-    double? consultationFee,
-    String? paymentStatus,
-    String? status,
-    DateTime? createdAt,
-    bool? isUrgent,
-    String? patientAge,
-    String? patientGender,
-    String? medicalHistory,
-    String? fcmToken,
-  }) {
+  factory AppointmentModel.fromMap(Map<String, dynamic> map) {
+    dynamic patientData = map['patientId'] ?? {};
+    String patientName = '', patientId = '';
+    if (patientData is Map<String, dynamic>) {
+      patientName = patientData['name']?.toString() ?? 'Patient';
+      patientId = patientData['_id']?.toString() ?? patientData['id']?.toString() ?? '';
+    } else {
+      patientName = 'Patient';
+      patientId = patientData?.toString() ?? '';
+    }
+    dynamic serviceData = map['serviceId'] ?? {};
+    String serviceName = '';
+    if (serviceData is Map<String, dynamic>) {
+      serviceName = serviceData['name']?.toString() ?? 'Service';
+    } else {
+      serviceName = 'Service';
+    }
+    DateTime appointmentDate;
+    try {
+      appointmentDate = DateTime.parse(map['appointmentDate']?.toString() ?? DateTime.now().toString());
+    } catch (e) {
+      appointmentDate = DateTime.now();
+    }
+
     return AppointmentModel(
-      id: id ?? this.id,
-      patientName: patientName ?? this.patientName,
-      patientEmail: patientEmail ?? this.patientEmail,
-      patientPhone: patientPhone ?? this.patientPhone,
-      patientAvatar: patientAvatar ?? this.patientAvatar,
-      date: date ?? this.date,
-      time: time ?? this.time,
-      service: service ?? this.service,
-      serviceType: serviceType ?? this.serviceType,
-      notes: notes ?? this.notes,
-      duration: duration ?? this.duration,
-      consultationFee: consultationFee ?? this.consultationFee,
-      paymentStatus: paymentStatus ?? this.paymentStatus,
-      status: status ?? this.status,
-      createdAt: createdAt ?? this.createdAt,
-      isUrgent: isUrgent ?? this.isUrgent,
-      patientAge: patientAge ?? this.patientAge,
-      patientGender: patientGender ?? this.patientGender,
-      medicalHistory: medicalHistory ?? this.medicalHistory,
-      fcmToken: fcmToken ?? this.fcmToken,
+      id: map['_id']?.toString() ?? map['id']?.toString() ?? '',
+      bookingId: map['bookingId']?.toString() ?? '',
+      patientId: patientId,
+      patientName: patientName,
+      patientEmail: map['patientEmail']?.toString(),
+      patientPhone: map['patientPhone']?.toString(),
+      patientAvatar: map['patientAvatar']?.toString(),
+      appointmentDate: appointmentDate,
+      appointmentTime: map['appointmentTime']?.toString() ?? '',
+      serviceName: serviceName,
+      serviceId: map['serviceId']?.toString(),
+      doctorId: map['doctorId']?.toString(),
+      consultationType: map['consultationType']?.toString() ?? 'in-person',
+      notes: map['notes']?.toString(),
+      duration: map['duration']?.toString() ?? '30 mins',
+      amount: double.tryParse(map['amount'].toString()) ?? 0.0,
+      paymentStatus: map['paymentStatus']?.toString() ?? 'pending',
+      status: map['status']?.toString() ?? 'scheduled',
+      createdAt: map['createdAt'] != null ? DateTime.parse(map['createdAt'].toString()) : DateTime.now(),
+      isUrgent: map['isUrgent'] ?? false,
+      patientAge: map['patientAge']?.toString(),
+      patientGender: map['patientGender']?.toString(),
+      medicalHistory: map['medicalHistory']?.toString(),
+      fcmToken: map['fcmToken']?.toString(),
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'bookingId': bookingId,
+      'patientId': patientId,
       'patientName': patientName,
-      'patientEmail': patientEmail,
-      'patientPhone': patientPhone,
-      'patientAvatar': patientAvatar,
-      'date': date,
-      'time': time,
-      'service': service,
-      'serviceType': serviceType,
-      'notes': notes,
-      'duration': duration,
-      'consultationFee': consultationFee,
+      'appointmentDate': appointmentDate.toIso8601String(),
+      'appointmentTime': appointmentTime,
+      'serviceName': serviceName,
+      'consultationType': consultationType,
+      'amount': amount,
       'paymentStatus': paymentStatus,
       'status': status,
-      'createdAt': createdAt.toIso8601String(),
-      'isUrgent': isUrgent,
-      'patientAge': patientAge,
-      'patientGender': patientGender,
-      'medicalHistory': medicalHistory,
-      'fcmToken': fcmToken,
     };
   }
 
-  factory AppointmentModel.fromMap(Map<String, dynamic> map) {
-    return AppointmentModel(
-      id: map['id'] ?? '',
-      patientName: map['patientName'] ?? '',
-      patientEmail: map['patientEmail'] ?? '',
-      patientPhone: map['patientPhone'] ?? '',
-      patientAvatar: map['patientAvatar'] ?? '',
-      date: map['date'] ?? '',
-      time: map['time'] ?? '',
-      service: map['service'] ?? '',
-      serviceType: map['serviceType'] ?? '',
-      notes: map['notes'] ?? '',
-      duration: map['duration'] ?? '30 mins',
-      consultationFee: (map['consultationFee'] ?? 0.0).toDouble(),
-      paymentStatus: map['paymentStatus'] ?? 'pending',
-      status: map['status'] ?? 'pending',
-      createdAt: map['createdAt'] != null ? DateTime.parse(map['createdAt']) : DateTime.now(),
-      isUrgent: map['isUrgent'] ?? false,
-      patientAge: map['patientAge'] ?? '',
-      patientGender: map['patientGender'] ?? '',
-      medicalHistory: map['medicalHistory'] ?? '',
-      fcmToken: map['fcmToken'] ?? '',
-    );
-  }
-
   String get displayDate {
-    final dateTime = DateTime.parse(date);
-    return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+    try {
+      return '${appointmentDate.day}/${appointmentDate.month}/${appointmentDate.year}';
+    } catch (e) {
+      return 'Date not available';
+    }
   }
 
   String get displayTime {
-    return time;
-  }
-
-  bool get isToday {
-    final today = DateTime.now();
-    final appointmentDate = DateTime.parse(date);
-    return today.year == appointmentDate.year && today.month == appointmentDate.month && today.day == appointmentDate.day;
-  }
-
-  bool get isUpcoming {
-    final now = DateTime.now();
-    final appointmentDate = DateTime.parse(date);
-    return appointmentDate.isAfter(now);
+    try {
+      if (appointmentTime.contains('AM') || appointmentTime.contains('PM')) {
+        return appointmentTime;
+      }
+      final timeParts = appointmentTime.split(':');
+      if (timeParts.length >= 2) {
+        int hour = int.tryParse(timeParts[0]) ?? 0;
+        int minute = int.tryParse(timeParts[1]) ?? 0;
+        String period = hour >= 12 ? 'PM' : 'AM';
+        hour = hour % 12;
+        hour = hour == 0 ? 12 : hour;
+        return '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} $period';
+      }
+      return appointmentTime;
+    } catch (e) {
+      return appointmentTime;
+    }
   }
 
   String get consultationFeeDisplay {
-    return '₹${consultationFee.toStringAsFixed(0)}';
+    return amount.toStringAsFixed(0);
   }
 
   String get patientInitials {
@@ -170,5 +157,15 @@ class AppointmentModel {
       return '${names[0][0]}${names[1][0]}'.toUpperCase();
     }
     return patientName.length >= 2 ? patientName.substring(0, 2).toUpperCase() : patientName.toUpperCase();
+  }
+
+  bool get isToday {
+    final today = DateTime.now();
+    return today.year == appointmentDate.year && today.month == appointmentDate.month && today.day == appointmentDate.day;
+  }
+
+  String get statusDisplay {
+    final statusMap = {'scheduled': 'Scheduled', 'confirmed': 'Confirmed', 'completed': 'Completed', 'cancelled': 'Cancelled', 'rescheduled': 'Rescheduled', 'no-show': 'No Show'};
+    return statusMap[status] ?? status;
   }
 }

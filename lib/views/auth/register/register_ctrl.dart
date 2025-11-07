@@ -14,9 +14,11 @@ class RegisterCtrl extends GetxController {
   final consultationFeeCtrl = TextEditingController(text: '500');
   final followUpFeeCtrl = TextEditingController(text: '300');
 
-  var isLoading = false.obs, isSpecialtyLoading = false.obs;
+  var isLoading = false.obs, isSpecialtyLoading = false.obs, isServicesLoading = false.obs;
   var specialities = <dynamic>[].obs;
+  var services = <dynamic>[].obs;
   var selectedSpecialty = ''.obs, selectedSpecialtyName = ''.obs;
+  var selectedService = ''.obs, selectedServiceName = ''.obs;
 
   var certifications = <Map<String, String>>[].obs;
 
@@ -28,21 +30,43 @@ class RegisterCtrl extends GetxController {
     super.onInit();
   }
 
-  void _loadInitialData() async => await loadSpecialities();
+  void _loadInitialData() async {
+    await Future.wait([loadServices()]);
+  }
 
   Future<void> loadSpecialities() async {
     isSpecialtyLoading.value = true;
     try {
-      final data = await authService.getSpecialities();
+      final data = await authService.getSpecialities(selectedService.value);
       specialities.assignAll(data);
     } finally {
       isSpecialtyLoading.value = false;
     }
   }
 
+  Future<void> loadServices() async {
+    isServicesLoading.value = true;
+    try {
+      final data = await authService.getServices();
+      services.assignAll(data);
+    } finally {
+      isServicesLoading.value = false;
+    }
+  }
+
   void setSelectedSpecialty(dynamic specialty) {
+    if (specialty == null) return;
     selectedSpecialty.value = specialty["_id"] ?? '';
     selectedSpecialtyName.value = specialty["name"] ?? '';
+  }
+
+  void setSelectedService(dynamic service) {
+    if (service == null) return;
+    selectedService.value = service["_id"] ?? '';
+    selectedServiceName.value = service["name"] ?? '';
+    if (selectedService.value.isNotEmpty) {
+      loadSpecialities();
+    }
   }
 
   void updateConsultationFee(String fee) {
@@ -93,6 +117,9 @@ class RegisterCtrl extends GetxController {
     if (selectedSpecialty.isEmpty) {
       return toaster.warning('Please select your specialty');
     }
+    if (selectedService.isEmpty) {
+      return toaster.warning('Please select your service');
+    }
     if (licenseCtrl.text.isEmpty) {
       return toaster.warning('Please enter your license number');
     }
@@ -119,6 +146,7 @@ class RegisterCtrl extends GetxController {
         "mobileNo": mobileCtrl.text.trim(),
         "license": licenseCtrl.text.trim(),
         "specialty": selectedSpecialty.value,
+        "services": selectedService.value,
         "bio": bioCtrl.text.trim(),
         "pricing": {"consultationFee": int.tryParse(consultationFeeCtrl.text) ?? 500, "followUpFee": int.tryParse(followUpFeeCtrl.text) ?? 300},
         "certifications": certifications.isNotEmpty
@@ -146,6 +174,7 @@ class RegisterCtrl extends GetxController {
     consultationFeeCtrl.text = '500';
     followUpFeeCtrl.text = '300';
     selectedSpecialty.value = '';
+    selectedService.value = '';
     certifications.clear();
   }
 
