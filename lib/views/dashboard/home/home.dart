@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import 'package:prime_health_doctors/models/appointment_model.dart';
+import 'package:prime_health_doctors/models/patient_model.dart';
+import 'package:prime_health_doctors/utils/network/api_config.dart';
 import 'package:prime_health_doctors/utils/theme/light.dart';
 import 'package:prime_health_doctors/views/dashboard/dashboard_ctrl.dart';
 import 'package:prime_health_doctors/views/dashboard/home/home_ctrl.dart';
@@ -20,7 +22,7 @@ class Home extends StatelessWidget {
         return Scaffold(
           backgroundColor: Colors.grey[50],
           body: RefreshIndicator(
-            onRefresh: () async => await ctrl.loadTodayAppointments(),
+            onRefresh: () async => await ctrl.onAPICalling(),
             child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
@@ -28,7 +30,15 @@ class Home extends StatelessWidget {
                 SliverToBoxAdapter(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [const SizedBox(height: 20), _buildBannerSection(), const SizedBox(height: 32), _buildAppointmentsSection(ctrl), const SizedBox(height: 20)],
+                    children: [
+                      const SizedBox(height: 20),
+                      _buildBannerSection(),
+                      const SizedBox(height: 32),
+                      _buildConsultedPatientsSection(ctrl),
+                      const SizedBox(height: 20),
+                      _buildAppointmentsSection(ctrl),
+                      const SizedBox(height: 20),
+                    ],
                   ),
                 ),
               ],
@@ -167,6 +177,178 @@ class Home extends StatelessWidget {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildConsultedPatientsSection(HomeCtrl ctrl) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Consulted Patients',
+                  style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                ),
+              ),
+              Obx(
+                () => Text(
+                  '${ctrl.consultedPatients.length} Total',
+                  style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600], fontWeight: FontWeight.w500),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Obx(() {
+            if (ctrl.isLoadingPatients.value && ctrl.consultedPatients.isEmpty) {
+              return _buildPatientsLoadingState();
+            }
+            return ctrl.consultedPatients.isEmpty ? _buildPatientsEmptyState() : _buildPatientsList(ctrl);
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPatientsList(HomeCtrl ctrl) {
+    return SizedBox(
+      height: 100,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: ctrl.consultedPatients.length,
+        padding: EdgeInsets.only(left: 2, right: 2),
+        itemBuilder: (context, index) {
+          final patient = ctrl.consultedPatients[index];
+          return _buildPatientCard(patient);
+        },
+      ),
+    );
+  }
+
+  Widget _buildPatientCard(PatientModel patient) {
+    final String? imageUrl = patient.profileImage;
+    final String displayImageUrl = imageUrl != null && imageUrl.isNotEmpty ? APIConfig.resourceBaseURL + imageUrl : '';
+    return Container(
+      width: Get.width * .8,
+      margin: const EdgeInsets.only(right: 12),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))],
+            ),
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              spacing: 12.0,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 70,
+                  height: 70,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.2), width: 2),
+                  ),
+                  child: ClipOval(
+                    child: displayImageUrl.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: displayImageUrl,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(
+                              color: AppTheme.backgroundLight,
+                              child: const Icon(Icons.person, color: AppTheme.textLight, size: 30),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              color: AppTheme.backgroundLight,
+                              child: const Icon(Icons.person, color: AppTheme.textLight, size: 30),
+                            ),
+                          )
+                        : Container(
+                            color: AppTheme.backgroundLight,
+                            child: const Icon(Icons.person, color: AppTheme.textLight, size: 30),
+                          ),
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        patient.name,
+                        style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text("Group : ${patient.bloodGroup}", style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary)),
+                          ),
+                          Text("Gender : ${patient.gender}", style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPatientsLoadingState() {
+    return SizedBox(
+      height: 120,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primaryBlue)),
+            const SizedBox(height: 8),
+            Text('Loading Patients...', style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600])),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPatientsEmptyState() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))],
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.people_outline_rounded, size: 48, color: Colors.grey[300]),
+          const SizedBox(height: 12),
+          Text(
+            'No Consulted Patients',
+            style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.grey[600]),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Patients you have consulted will appear here',
+            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[500]),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }

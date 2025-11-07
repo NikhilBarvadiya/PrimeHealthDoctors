@@ -189,6 +189,21 @@ class AuthService extends GetxService {
     }
   }
 
+  Future<dynamic> getConsultedPatients() async {
+    try {
+      final response = await ApiManager().call(APIIndex.patientsConsulted, {}, ApiType.post);
+      if (response.status == 200 && response.data != null) {
+        return response.data;
+      } else {
+        toaster.warning(response.message ?? 'Failed to load bookings');
+        return [];
+      }
+    } catch (err) {
+      toaster.error('Bookings loading failed: ${err.toString()}');
+      return [];
+    }
+  }
+
   Future<dynamic> bookings(Map<String, dynamic> request) async {
     try {
       final response = await ApiManager().call(APIIndex.bookings, request, ApiType.post);

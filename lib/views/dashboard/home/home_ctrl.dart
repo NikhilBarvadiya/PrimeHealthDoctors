@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:prime_health_doctors/models/appointment_model.dart';
+import 'package:prime_health_doctors/models/patient_model.dart';
 import 'package:prime_health_doctors/utils/config/session.dart';
 import 'package:prime_health_doctors/utils/storage.dart';
 import 'package:prime_health_doctors/views/auth/auth_service.dart';
@@ -7,7 +8,8 @@ import 'package:prime_health_doctors/views/auth/auth_service.dart';
 class HomeCtrl extends GetxController {
   var userName = 'Dr. John Smith'.obs;
   var todayAppointments = <AppointmentModel>[].obs;
-  var isLoading = false.obs;
+  var consultedPatients = <PatientModel>[].obs;
+  var isLoading = false.obs, isLoadingPatients = false.obs;
 
   AuthService get authService => Get.find<AuthService>();
 
@@ -15,7 +17,7 @@ class HomeCtrl extends GetxController {
   void onInit() {
     super.onInit();
     loadUserData();
-    loadTodayAppointments();
+    onAPICalling();
   }
 
   void loadUserData() async {
@@ -27,6 +29,11 @@ class HomeCtrl extends GetxController {
     } catch (e) {
       Get.snackbar('Error', 'Failed to load user data: $e', snackPosition: SnackPosition.BOTTOM);
     }
+  }
+
+  onAPICalling() async {
+    await loadTodayAppointments();
+    await loadConsultedPatients();
   }
 
   Future<void> loadTodayAppointments() async {
@@ -47,6 +54,25 @@ class HomeCtrl extends GetxController {
       todayAppointments.clear();
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> loadConsultedPatients() async {
+    try {
+      isLoadingPatients.value = true;
+      final response = await authService.getConsultedPatients();
+      if (response != null && response['patients'] != null) {
+        final List<dynamic> data = response['patients'];
+        final patients = data.map((item) => PatientModel.fromMap(item)).toList();
+        consultedPatients.assignAll(patients);
+      } else {
+        consultedPatients.clear();
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to load consulted patients: $e', snackPosition: SnackPosition.BOTTOM);
+      consultedPatients.clear();
+    } finally {
+      isLoadingPatients.value = false;
     }
   }
 

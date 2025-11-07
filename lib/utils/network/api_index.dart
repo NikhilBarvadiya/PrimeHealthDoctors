@@ -13,4 +13,5 @@ class APIIndex {
   static const String deleteSlots = 'delete-slot'; // done
   static const String bookings = 'bookings/list';
   static const String updateBookingStatus = 'bookings/update-status';
+  static const String patientsConsulted = 'patients/consulted';
 }
