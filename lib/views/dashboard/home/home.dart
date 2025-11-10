@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,6 +9,7 @@ import 'package:prime_health_doctors/models/patient_model.dart';
 import 'package:prime_health_doctors/utils/network/api_config.dart';
 import 'package:prime_health_doctors/utils/theme/light.dart';
 import 'package:prime_health_doctors/views/dashboard/dashboard_ctrl.dart';
+import 'package:prime_health_doctors/views/dashboard/home/call_history/call_history.dart';
 import 'package:prime_health_doctors/views/dashboard/home/home_ctrl.dart';
 import 'package:prime_health_doctors/views/dashboard/home/appointments/ui/appointment_details.dart';
 
@@ -76,6 +78,15 @@ class Home extends StatelessWidget {
           ),
         ),
       ),
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 8.0),
+          child: IconButton(
+            icon: Icon(CupertinoIcons.phone, color: AppTheme.textPrimary, size: 26),
+            onPressed: () => Get.to(() => CallHistory()),
+          ),
+        ),
+      ],
     );
   }
 

@@ -3,8 +3,13 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:prime_health_doctors/models/appointment_model.dart';
 import 'package:prime_health_doctors/models/calling_model.dart';
+import 'package:prime_health_doctors/models/user_model.dart';
+import 'package:prime_health_doctors/service/calling_service.dart';
+import 'package:prime_health_doctors/utils/config/session.dart';
+import 'package:prime_health_doctors/utils/storage.dart';
 import 'package:prime_health_doctors/utils/theme/light.dart';
 import 'package:prime_health_doctors/views/auth/auth_service.dart';
+import 'package:prime_health_doctors/views/dashboard/home/appointments/ui/calling_view.dart';
 
 class AppointmentDetails extends StatefulWidget {
   final AppointmentModel appointment;
@@ -419,33 +424,34 @@ class _AppointmentDetailsState extends State<AppointmentDetails> {
   }
 
   onCallAction(BuildContext context, CallType callType) async {
-    // if (appointment.fcmToken.toString().isEmpty) {
-    //   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Token is missing...!')));
-    //   return;
-    // }
-    // final userData = await read(AppSession.userData);
-    // if (userData != null) {
-    //   UserModel userModel = UserModel(
-    //     id: "1",
-    //     name: userData["name"] ?? 'Dr. John Smith',
-    //     email: userData["email"] ?? 'john.smith@example.com',
-    //     mobile: userData["mobile"] ?? '+91 98765 43210',
-    //     specialty: userData["specialty"] ?? 'Orthopedic Physiotherapy',
-    //   );
-    //   String channelName = "${userModel.id}_${appointment.id}_${DateTime.now().millisecondsSinceEpoch}";
-    //   CallData callData = CallData(senderId: userModel.id, senderName: userModel.name, senderFCMToken: "", callType: callType, status: CallStatus.calling, channelName: channelName);
-    //   CallingService().makeCall(appointment.fcmToken, callData);
-    //   if (context.mounted) {
-    //     await Navigator.push(
-    //       context,
-    //       MaterialPageRoute(
-    //         builder: (context) {
-    //           return CallingView(channelName: channelName, callType: callType, receiver: appointment, sender: userModel);
-    //         },
-    //       ),
-    //     );
-    //   }
-    // }
+    if (widget.appointment.patientFcm.toString().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Token is missing...!')));
+      return;
+    }
+    final userData = await read(AppSession.userData);
+    if (userData != null) {
+      UserModel userModel = UserModel(
+        id: userData["_id"] ?? "",
+        fcm: userData["fcm"] ?? "",
+        name: userData["name"] ?? 'Dr. John Smith',
+        email: userData["email"] ?? 'john.smith@example.com',
+        mobile: userData["mobile"] ?? '+91 98765 43210',
+        specialty: userData["specialty"] ?? 'Orthopedic Physiotherapy',
+      );
+      String channelName = "${userModel.id}_${widget.appointment.id}_${DateTime.now().millisecondsSinceEpoch}";
+      CallData callData = CallData(senderId: userModel.id, senderName: userModel.name, senderFCMToken: userModel.fcm, callType: callType, status: CallStatus.calling, channelName: channelName);
+      CallingService().makeCall(widget.appointment, callData);
+      if (context.mounted) {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) {
+              return CallingView(channelName: channelName, callType: callType, receiver: widget.appointment, sender: userModel);
+            },
+          ),
+        );
+      }
+    }
   }
 
   void _confirmAppointment() {

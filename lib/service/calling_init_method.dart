@@ -61,7 +61,7 @@ class CallingInitMethod {
           patientAge: '45',
           patientGender: 'Male',
           medicalHistory: 'Hypertension, Type 2 Diabetes',
-          fcmToken: _incomingCall?.senderFCMToken ?? "",
+          patientFcm: _incomingCall?.senderFCMToken ?? "",
           bookingId: '',
           patientId: '',
           appointmentDate: DateTime.now(),
@@ -106,7 +106,7 @@ class CallingInitMethod {
               AppointmentModel(
                 id: callData.senderId,
                 patientName: callData.senderName,
-                fcmToken: callData.senderFCMToken,
+                patientFcm: callData.senderFCMToken,
                 patientEmail: 'rajesh.kumar@email.com',
                 patientPhone: '+91 98765 43210',
                 patientAvatar: '',
@@ -134,15 +134,46 @@ class CallingInitMethod {
             final userData = await read(AppSession.userData);
             if (userData != null) {
               UserModel userModel = UserModel(
-                id: "1",
+                id: userData["_id"] ?? "",
+                fcm: userData["fcm"] ?? "",
                 name: userData["name"] ?? 'Dr. John Smith',
                 email: userData["email"] ?? 'john.smith@example.com',
                 mobile: userData["mobile"] ?? '+91 98765 43210',
                 specialty: userData["specialty"] ?? 'Orthopedic Physiotherapy',
               );
               CallingService().makeCall(
-                callData.senderFCMToken,
-                CallData(senderId: userModel.id, senderName: userModel.name, senderFCMToken: "", callType: callData.callType, status: CallStatus.rejected, channelName: callData.channelName),
+                AppointmentModel(
+                  id: callData.senderId,
+                  patientName: callData.senderName,
+                  patientFcm: callData.senderFCMToken,
+                  patientEmail: 'rajesh.kumar@email.com',
+                  patientPhone: '+91 98765 43210',
+                  patientAvatar: '',
+                  serviceName: 'Cardiology Consultation',
+                  notes: 'Follow-up for hypertension management',
+                  duration: '45 mins',
+                  amount: 1500.0,
+                  paymentStatus: 'paid',
+                  status: 'confirmed',
+                  createdAt: DateTime(2024, 1, 10),
+                  isUrgent: false,
+                  patientAge: '45',
+                  patientGender: 'Male',
+                  medicalHistory: 'Hypertension, Type 2 Diabetes',
+                  bookingId: '',
+                  patientId: '',
+                  appointmentDate: DateTime.now(),
+                  appointmentTime: '',
+                  consultationType: '',
+                ),
+                CallData(
+                  senderId: userModel.id,
+                  senderName: userModel.name,
+                  senderFCMToken: userModel.fcm,
+                  callType: callData.callType,
+                  status: CallStatus.rejected,
+                  channelName: callData.channelName,
+                ),
               );
             }
             Get.back();
@@ -159,7 +190,8 @@ class CallingInitMethod {
     final userData = await read(AppSession.userData);
     if (userData == null) return;
     UserModel userModel = UserModel(
-      id: "1",
+      id: userData["_id"] ?? "",
+      fcm: userData["fcm"] ?? "",
       name: userData["name"] ?? 'Dr. John Smith',
       email: userData["email"] ?? 'john.smith@example.com',
       mobile: userData["mobile"] ?? '+91 98765 43210',

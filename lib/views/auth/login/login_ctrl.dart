@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:prime_health_doctors/service/calling_service.dart';
 import 'package:prime_health_doctors/utils/helper.dart';
 import 'package:prime_health_doctors/utils/routes/route_name.dart';
 import 'package:prime_health_doctors/utils/toaster.dart';
@@ -21,7 +22,8 @@ class LoginCtrl extends GetxController {
     isLoading.value = true;
     try {
       final machineId = await helper.getDeviceUniqueId();
-      final loginRequest = {'mobileNo': mobileCtrl.text.trim(), 'machineId': machineId};
+      String getToken = await CallingService().getToken() ?? "";
+      final loginRequest = {'mobileNo': mobileCtrl.text.trim(), 'machineId': machineId, "fcm": getToken};
       final loginResponse = await authService.login(loginRequest);
       if (loginResponse != null && loginResponse['doctorId'] != null) {
         final otpRequest = {'mobileNo': mobileCtrl.text.trim(), 'doctorId': loginResponse['doctorId']};

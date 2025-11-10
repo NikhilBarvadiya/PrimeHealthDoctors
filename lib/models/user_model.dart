@@ -1,5 +1,6 @@
 class UserModel {
   String id;
+  String fcm;
   String name;
   String email;
   String mobile;
@@ -16,6 +17,7 @@ class UserModel {
 
   UserModel({
     this.id = '',
+    this.fcm = '',
     this.name = '',
     this.email = '',
     this.mobile = '',
@@ -36,6 +38,7 @@ class UserModel {
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['_id']?.toString() ?? '',
+      fcm: json['fcm'] ?? '',
       name: json['name'] ?? '',
       email: json['email'] ?? '',
       mobile: json['mobileNo'] ?? '',

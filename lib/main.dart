@@ -18,8 +18,6 @@ import 'package:prime_health_doctors/views/preload.dart';
 import 'package:prime_health_doctors/views/restart.dart';
 import 'package:toastification/toastification.dart';
 
-String localFCMToken = "cMSbKX9wSd-PaCI3L-M5g9:APA91bHBTrhr6OUZ-kwGtKyj-F6K5FAVpRV8NWHWWisUM9FEQFcvEeiZNOaeXvhb252jKkqRzkw83-tmvXqLbxwNc7YAIdVl69ipgH0LNCtAAq6WqG7ft7M";
-
 Future<void> main() async {
   await GetStorage.init();
   GestureBinding.instance.resamplingEnabled = true;
@@ -35,8 +33,9 @@ Future<void> main() async {
   runApp(const RestartApp(child: MyApp()));
 }
 
+@pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await CallingService().handleBackgroundMessage(message);
 }
 

@@ -2,6 +2,7 @@ class AppointmentModel {
   final String id;
   final String bookingId;
   final String patientId;
+  final String patientFcm;
   final String patientName;
   final String? patientEmail;
   final String? patientPhone;
@@ -22,12 +23,12 @@ class AppointmentModel {
   final String? patientAge;
   final String? patientGender;
   final String? medicalHistory;
-  final String? fcmToken;
 
   AppointmentModel({
     required this.id,
     required this.bookingId,
     required this.patientId,
+    required this.patientFcm,
     required this.patientName,
     this.patientEmail,
     this.patientPhone,
@@ -48,14 +49,14 @@ class AppointmentModel {
     this.patientAge,
     this.patientGender,
     this.medicalHistory,
-    this.fcmToken,
   });
 
   factory AppointmentModel.fromMap(Map<String, dynamic> map) {
     dynamic patientData = map['patientId'] ?? {};
-    String patientName = '', patientId = '';
+    String patientName = '', patientId = '', patientFcm = '';
     if (patientData is Map<String, dynamic>) {
       patientName = patientData['name']?.toString() ?? 'Patient';
+      patientFcm = patientData['fcm']?.toString() ?? 'Patient';
       patientId = patientData['_id']?.toString() ?? patientData['id']?.toString() ?? '';
     } else {
       patientName = 'Patient';
@@ -79,6 +80,7 @@ class AppointmentModel {
       id: map['_id']?.toString() ?? map['id']?.toString() ?? '',
       bookingId: map['bookingId']?.toString() ?? '',
       patientId: patientId,
+      patientFcm: patientFcm,
       patientName: patientName,
       patientEmail: map['patientEmail']?.toString(),
       patientPhone: map['patientPhone']?.toString(),
@@ -99,7 +101,6 @@ class AppointmentModel {
       patientAge: map['patientAge']?.toString(),
       patientGender: map['patientGender']?.toString(),
       medicalHistory: map['medicalHistory']?.toString(),
-      fcmToken: map['fcmToken']?.toString(),
     );
   }
 
@@ -108,6 +109,7 @@ class AppointmentModel {
       'id': id,
       'bookingId': bookingId,
       'patientId': patientId,
+      'patientFcm': patientFcm,
       'patientName': patientName,
       'appointmentDate': appointmentDate.toIso8601String(),
       'appointmentTime': appointmentTime,
