@@ -1,9 +1,9 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:prime_health_doctors/models/appointment_model.dart';
 import 'package:prime_health_doctors/models/patient_model.dart';
 import 'package:prime_health_doctors/utils/network/api_config.dart';
@@ -22,7 +22,7 @@ class Home extends StatelessWidget {
       init: HomeCtrl(),
       builder: (ctrl) {
         return Scaffold(
-          backgroundColor: Colors.grey[50],
+          backgroundColor: AppTheme.backgroundLight,
           body: RefreshIndicator(
             onRefresh: () async => await ctrl.onAPICalling(),
             child: CustomScrollView(
@@ -30,18 +30,22 @@ class Home extends StatelessWidget {
               slivers: [
                 _buildAppBar(ctrl),
                 SliverToBoxAdapter(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 20),
-                      _buildBannerSection(),
-                      const SizedBox(height: 32),
-                      _buildConsultedPatientsSection(ctrl),
-                      const SizedBox(height: 20),
-                      _buildAppointmentsSection(ctrl),
-                      const SizedBox(height: 20),
-                    ],
-                  ),
+                  child: Obx(() {
+                    if (ctrl.isLoading.value && ctrl.consultedPatients.isEmpty && ctrl.todayAppointments.isEmpty) {
+                      return _buildFullShimmer();
+                    }
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildBannerSection(),
+                        const SizedBox(height: 24),
+                        _buildConsultedPatientsSection(ctrl),
+                        const SizedBox(height: 24),
+                        _buildAppointmentsSection(ctrl),
+                        const SizedBox(height: 32),
+                      ],
+                    );
+                  }),
                 ),
               ],
             ),
@@ -54,39 +58,250 @@ class Home extends StatelessWidget {
   SliverAppBar _buildAppBar(HomeCtrl ctrl) {
     return SliverAppBar(
       elevation: 0,
-      toolbarHeight: 65,
+      toolbarHeight: 80,
       backgroundColor: Colors.white,
       pinned: true,
       floating: true,
-      expandedHeight: 120,
+      expandedHeight: 100,
       automaticallyImplyLeading: false,
       flexibleSpace: FlexibleSpaceBar(
         collapseMode: CollapseMode.pin,
         background: Container(color: Colors.white),
         titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
         title: Obx(
-          () => Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Hello,', style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600])),
-              Text(
-                ctrl.userName.value,
-                style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
-              ),
-            ],
+          () => AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: ctrl.isLoading.value
+                ? _buildAppBarShimmer()
+                : Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Good ${_getGreeting()}!',
+                        style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary, fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        ctrl.userName.value,
+                        style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
+                      ),
+                    ],
+                  ),
           ),
         ),
       ),
       actions: [
         Padding(
-          padding: const EdgeInsets.only(right: 8.0),
+          padding: const EdgeInsets.only(right: 10.0),
           child: IconButton(
-            icon: Icon(CupertinoIcons.phone, color: AppTheme.textPrimary, size: 26),
+            style: ButtonStyle(
+              shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+              padding: WidgetStatePropertyAll(const EdgeInsets.all(8)),
+              backgroundColor: WidgetStatePropertyAll(Colors.grey[100]),
+            ),
+            icon: const Icon(Icons.contacts, color: Colors.black87, size: 20),
             onPressed: () => Get.to(() => CallHistory()),
           ),
         ),
       ],
+    );
+  }
+
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Morning';
+    if (hour < 17) return 'Afternoon';
+    return 'Evening';
+  }
+
+  Widget _buildAppBarShimmer() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade200,
+      highlightColor: Colors.grey.shade50,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 100,
+            height: 14,
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
+          ),
+          const SizedBox(height: 6),
+          Container(
+            width: 150,
+            height: 20,
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFullShimmer() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade200,
+      highlightColor: Colors.grey.shade50,
+      child: Column(children: [_buildBannerShimmer(), const SizedBox(height: 24), _buildPatientsShimmer(), const SizedBox(height: 24), _buildAppointmentsShimmer()]),
+    );
+  }
+
+  Widget _buildBannerShimmer() {
+    return SizedBox(
+      height: 160,
+      child: PageView.builder(
+        itemCount: 3,
+        padEnds: false,
+        controller: PageController(viewportFraction: 0.85),
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey.shade200,
+              highlightColor: Colors.grey.shade50,
+              child: Container(
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+              ),
+            ),
+          );
+        },
+      ),
+    ).paddingOnly(left: 5, right: 5);
+  }
+
+  Widget _buildPatientsShimmer() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 150,
+                height: 20,
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
+              ),
+              const Spacer(),
+              Container(
+                width: 50,
+                height: 16,
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 120,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 5),
+              itemCount: 3,
+              itemBuilder: (context, index) {
+                return Container(
+                  width: Get.width * 0.75,
+                  margin: const EdgeInsets.only(right: 12),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 120,
+                              height: 16,
+                              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              width: 100,
+                              height: 12,
+                              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAppointmentsShimmer() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 180,
+                height: 20,
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
+              ),
+              const Spacer(),
+              Container(
+                width: 50,
+                height: 16,
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Column(children: List.generate(3, (index) => _buildAppointmentCardShimmer())),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAppointmentCardShimmer() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+      child: const Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(radius: 20, backgroundColor: Colors.white),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(width: 120, height: 16, child: ColoredBox(color: Colors.white)),
+                      SizedBox(height: 4),
+                      SizedBox(width: 80, height: 12, child: ColoredBox(color: Colors.white)),
+                    ],
+                  ),
+                ),
+                SizedBox(width: 60, height: 24, child: ColoredBox(color: Colors.white)),
+              ],
+            ),
+            SizedBox(height: 12),
+            SizedBox(height: 40, child: ColoredBox(color: Colors.white)),
+          ],
+        ),
+      ),
     );
   }
 
@@ -96,16 +311,19 @@ class Home extends StatelessWidget {
         'image': 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
         'title': 'Excellence in Healthcare',
         'subtitle': 'Providing world-class medical care with compassion and expertise',
+        'color': AppTheme.primaryBlue,
       },
       {
         'image': 'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?ixlib=rb-4.0.3&auto=format&fit=crop&w=2073&q=80',
         'title': 'Advanced Medical Technology',
         'subtitle': 'State-of-the-art equipment for accurate diagnosis and treatment',
+        'color': AppTheme.accentTeal,
       },
       {
         'image': 'https://images.unsplash.com/photo-1551601651-2a8555f1a136?ixlib=rb-4.0.3&auto=format&fit=crop&w=2032&q=80',
         'title': 'Patient-Centered Care',
         'subtitle': 'Your health and wellbeing are our top priorities',
+        'color': AppTheme.accentGreen,
       },
     ];
 
@@ -117,7 +335,6 @@ class Home extends StatelessWidget {
         controller: PageController(viewportFraction: 0.85),
         itemBuilder: (context, index) {
           final banner = banners[index];
-          final gradientColors = [AppTheme.accentTeal, AppTheme.accentGreen];
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Card(
@@ -132,15 +349,11 @@ class Home extends StatelessWidget {
                       imageUrl: banner['image'].toString(),
                       fit: BoxFit.cover,
                       placeholder: (context, url) => Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(colors: gradientColors, begin: Alignment.topLeft, end: Alignment.bottomRight),
-                        ),
+                        color: banner['color'] as Color,
                         child: const Center(child: CircularProgressIndicator(color: Colors.white)),
                       ),
                       errorWidget: (context, url, error) => Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(colors: gradientColors, begin: Alignment.topLeft, end: Alignment.bottomRight),
-                        ),
+                        color: banner['color'] as Color,
                         child: const Icon(Icons.error, color: Colors.white, size: 40),
                       ),
                     ),
@@ -158,28 +371,11 @@ class Home extends StatelessWidget {
                         children: [
                           Text(
                             banner['title'].toString(),
-                            style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                            style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                           ),
                           const SizedBox(height: 4),
-                          Text(banner['subtitle'].toString(), style: GoogleFonts.poppins(fontSize: 12, color: Colors.white.withOpacity(0.9))),
+                          Text(banner['subtitle'].toString(), style: GoogleFonts.inter(fontSize: 12, color: Colors.white.withOpacity(0.9))),
                         ],
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 8,
-                      left: 0,
-                      right: 0,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(
-                          banners.length,
-                          (i) => Container(
-                            width: 8,
-                            height: 8,
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                            decoration: BoxDecoration(shape: BoxShape.circle, color: i == index ? Colors.white : Colors.white.withOpacity(0.5)),
-                          ),
-                        ),
                       ),
                     ),
                   ],
@@ -189,7 +385,7 @@ class Home extends StatelessWidget {
           );
         },
       ),
-    );
+    ).paddingOnly(left: 5, right: 5);
   }
 
   Widget _buildConsultedPatientsSection(HomeCtrl ctrl) {
@@ -200,16 +396,15 @@ class Home extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(
-                child: Text(
-                  'Consulted Patients',
-                  style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
-                ),
+              Text(
+                'Recent Patients',
+                style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
               ),
+              const Spacer(),
               Obx(
                 () => Text(
                   '${ctrl.consultedPatients.length} Total',
-                  style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600], fontWeight: FontWeight.w500),
+                  style: GoogleFonts.inter(fontSize: 14, color: AppTheme.textSecondary, fontWeight: FontWeight.w500),
                 ),
               ),
             ],
@@ -217,9 +412,12 @@ class Home extends StatelessWidget {
           const SizedBox(height: 16),
           Obx(() {
             if (ctrl.isLoadingPatients.value && ctrl.consultedPatients.isEmpty) {
-              return _buildPatientsLoadingState();
+              return _buildPatientsShimmer();
             }
-            return ctrl.consultedPatients.isEmpty ? _buildPatientsEmptyState() : _buildPatientsList(ctrl);
+            if (ctrl.consultedPatients.isEmpty) {
+              return _buildEmptyState('No Patients Yet', 'Patients you consult will appear here', Icons.people_outline_rounded);
+            }
+            return _buildPatientsList(ctrl);
           }),
         ],
       ),
@@ -228,11 +426,12 @@ class Home extends StatelessWidget {
 
   Widget _buildPatientsList(HomeCtrl ctrl) {
     return SizedBox(
-      height: 100,
+      height: 120,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
         itemCount: ctrl.consultedPatients.length,
-        padding: EdgeInsets.only(left: 2, right: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 5),
         itemBuilder: (context, index) {
           final patient = ctrl.consultedPatients[index];
           return _buildPatientCard(patient);
@@ -245,7 +444,7 @@ class Home extends StatelessWidget {
     final String? imageUrl = patient.profileImage;
     final String displayImageUrl = imageUrl != null && imageUrl.isNotEmpty ? APIConfig.resourceBaseURL + imageUrl : '';
     return Container(
-      width: Get.width * .8,
+      width: Get.width * 0.75,
       margin: const EdgeInsets.only(right: 12),
       child: Material(
         color: Colors.transparent,
@@ -259,12 +458,10 @@ class Home extends StatelessWidget {
             ),
             padding: const EdgeInsets.all(16),
             child: Row(
-              spacing: 12.0,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                  width: 70,
-                  height: 70,
+                  width: 60,
+                  height: 60,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.2), width: 2),
@@ -289,6 +486,7 @@ class Home extends StatelessWidget {
                           ),
                   ),
                 ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,17 +494,17 @@ class Home extends StatelessWidget {
                     children: [
                       Text(
                         patient.name,
-                        style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                        style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 4),
                       Row(
                         children: [
                           Expanded(
-                            child: Text("Group : ${patient.bloodGroup}", style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary)),
+                            child: Text("Blood Group: ${patient.bloodGroup}", style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary)),
                           ),
-                          Text("Gender : ${patient.gender}", style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary)),
+                          Text("Gender: ${patient.gender}", style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary)),
                         ],
                       ),
                     ],
@@ -320,50 +518,6 @@ class Home extends StatelessWidget {
     );
   }
 
-  Widget _buildPatientsLoadingState() {
-    return SizedBox(
-      height: 120,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primaryBlue)),
-            const SizedBox(height: 8),
-            Text('Loading Patients...', style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600])),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPatientsEmptyState() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))],
-      ),
-      child: Column(
-        children: [
-          Icon(Icons.people_outline_rounded, size: 48, color: Colors.grey[300]),
-          const SizedBox(height: 12),
-          Text(
-            'No Consulted Patients',
-            style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.grey[600]),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Patients you have consulted will appear here',
-            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[500]),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildAppointmentsSection(HomeCtrl ctrl) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -372,33 +526,30 @@ class Home extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(
-                child: Text(
-                  'Today\'s Appointments',
-                  style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
-                ),
+              Text(
+                'Today\'s Appointments',
+                style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
               ),
+              const Spacer(),
               TextButton(
                 onPressed: () {
                   final dashboardCtrl = Get.find<DashboardCtrl>();
                   dashboardCtrl.changeTab(1);
                 },
-                style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8)),
-                child: Obx(
-                  () => Text(
-                    'View All (${ctrl.todayAppointmentsCount})',
-                    style: GoogleFonts.poppins(color: AppTheme.primaryBlue, fontWeight: FontWeight.w600, fontSize: 14),
-                  ),
-                ),
+                style: TextButton.styleFrom(foregroundColor: AppTheme.primaryBlue, padding: EdgeInsets.zero),
+                child: Obx(() => Text('View All (${ctrl.todayAppointmentsCount})', style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 14))),
               ),
             ],
           ),
           const SizedBox(height: 16),
           Obx(() {
-            if (ctrl.isLoading.value) {
-              return _buildLoadingState();
+            if (ctrl.isLoading.value && ctrl.todayAppointments.isEmpty) {
+              return _buildAppointmentsShimmer();
             }
-            return ctrl.todayAppointments.isEmpty ? _buildEmptyState() : _buildAppointmentsList(ctrl);
+            if (ctrl.todayAppointments.isEmpty) {
+              return _buildEmptyState('No Appointments Today', 'No appointments scheduled for today', Icons.calendar_today_outlined);
+            }
+            return _buildAppointmentsList(ctrl);
           }),
         ],
       ),
@@ -406,10 +557,11 @@ class Home extends StatelessWidget {
   }
 
   Widget _buildAppointmentsList(HomeCtrl ctrl) {
-    return Column(children: ctrl.todayAppointments.take(5).map((appointment) => _buildAppointmentItem(ctrl, appointment)).toList());
+    return Column(children: ctrl.todayAppointments.take(5).map((appointment) => _buildAppointmentCard(ctrl, appointment)).toList());
   }
 
-  Widget _buildAppointmentItem(HomeCtrl ctrl, AppointmentModel appointment) {
+  Widget _buildAppointmentCard(HomeCtrl ctrl, AppointmentModel appointment) {
+    final statusColor = _getStatusColor(appointment.status);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -420,21 +572,49 @@ class Home extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
+          borderRadius: BorderRadius.circular(16),
           onTap: () async {
             await Get.to(() => AppointmentDetails(appointment: appointment)) ?? false;
             await ctrl.loadTodayAppointments();
           },
-          borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: Row(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildPatientAvatar(appointment),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildPatientInfo(appointment), const SizedBox(height: 8), _buildAppointmentDetails(appointment)]),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(color: statusColor.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                      child: Icon(_getStatusIcon(appointment.status), color: statusColor, size: 20),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            appointment.patientName,
+                            style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(appointment.serviceName ?? 'Consultation', style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary)),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(color: statusColor.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
+                      child: Text(
+                        appointment.statusDisplay.toUpperCase(),
+                        style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: statusColor),
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 12),
+                _buildAppointmentDetails(appointment),
               ],
             ),
           ),
@@ -443,142 +623,64 @@ class Home extends StatelessWidget {
     );
   }
 
-  Widget _buildPatientAvatar(AppointmentModel appointment) {
-    return Container(
-      width: 36,
-      height: 36,
-      decoration: BoxDecoration(color: AppTheme.primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-      child: Icon(Icons.person_rounded, color: AppTheme.primaryBlue, size: 20),
-    );
-  }
-
-  Widget _buildPatientInfo(AppointmentModel appointment) {
-    final statusColor = _getStatusColor(appointment.status);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                appointment.patientName,
-                style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(color: statusColor.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-              child: Text(
-                appointment.statusDisplay,
-                style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500, color: statusColor),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                appointment.serviceName ?? 'Consultation',
-                style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            if (appointment.isUrgent)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(color: Colors.red.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-                child: Text(
-                  'URGENT',
-                  style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w400, color: Colors.red),
-                ),
-              ),
-          ],
-        ),
-      ],
-    );
-  }
-
   Widget _buildAppointmentDetails(AppointmentModel appointment) {
-    return Wrap(
-      spacing: 8.0,
-      runSpacing: 10.0,
-      children: [
-        _buildDetailChip(icon: Icons.access_time_outlined, text: DateFormat('MMM dd, yyyy').format(appointment.appointmentDate)),
-        _buildDetailChip(icon: Icons.access_time_outlined, text: appointment.appointmentTime),
-        _buildDetailChip(icon: Icons.medical_services_outlined, text: appointment.consultationType),
-        _buildDetailChip(icon: Icons.attach_money_outlined, text: appointment.consultationFeeDisplay),
-      ],
-    );
-  }
-
-  Widget _buildDetailChip({required IconData icon, required String text}) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(color: AppTheme.backgroundLight, borderRadius: BorderRadius.circular(8)),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: Colors.grey[600]),
+          _buildDetailItem(Icons.calendar_today_rounded, DateFormat('MMM dd, yyyy').format(appointment.appointmentDate), AppTheme.textSecondary),
+          _buildDetailItem(Icons.access_time_rounded, appointment.appointmentTime, AppTheme.textSecondary),
+          _buildDetailItem(Icons.medical_services_rounded, appointment.consultationType, AppTheme.textSecondary),
+          if (appointment.isUrgent) _buildDetailItem(Icons.warning_amber_rounded, 'Urgent', AppTheme.emergencyRed),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailItem(IconData icon, String text, Color color) {
+    return Expanded(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 14, color: color),
           const SizedBox(width: 4),
-          Text(
-            text,
-            style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w500, color: Colors.grey[700]),
+          Flexible(
+            child: Text(
+              text,
+              style: GoogleFonts.inter(fontSize: 12, color: color, fontWeight: FontWeight.w500),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildLoadingState() {
+  Widget _buildEmptyState(String title, String subtitle, IconData icon) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 40),
+      padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))],
+        border: Border.all(color: AppTheme.borderColor),
       ),
       child: Column(
         children: [
-          const CircularProgressIndicator(),
+          Icon(icon, size: 48, color: AppTheme.textLight),
           const SizedBox(height: 12),
           Text(
-            'Loading Appointments...',
-            style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.grey[600]),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 40),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))],
-      ),
-      child: Column(
-        children: [
-          Icon(Icons.calendar_today_outlined, size: 48, color: Colors.grey[300]),
-          const SizedBox(height: 12),
-          Text(
-            'No Appointments Today',
-            style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.grey[600]),
+            title,
+            style: GoogleFonts.inter(color: AppTheme.textSecondary, fontWeight: FontWeight.w600, fontSize: 16),
           ),
           const SizedBox(height: 4),
-          Text('No appointments scheduled for today', style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[500])),
+          Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(color: AppTheme.textLight, fontSize: 14),
+          ),
         ],
       ),
     );
@@ -588,17 +690,37 @@ class Home extends StatelessWidget {
     switch (status.toLowerCase()) {
       case 'confirmed':
       case 'scheduled':
-        return Colors.green;
+        return AppTheme.successGreen;
       case 'pending':
         return Colors.orange;
       case 'cancelled':
-        return Colors.red;
+      case 'no-show':
+        return AppTheme.emergencyRed;
       case 'completed':
-        return Colors.blue;
+        return AppTheme.primaryBlue;
       case 'rescheduled':
         return Colors.purple;
       default:
-        return Colors.grey;
+        return AppTheme.textLight;
+    }
+  }
+
+  IconData _getStatusIcon(String status) {
+    switch (status) {
+      case 'scheduled':
+        return Icons.schedule_rounded;
+      case 'confirmed':
+        return Icons.check_circle_rounded;
+      case 'completed':
+        return Icons.verified_rounded;
+      case 'cancelled':
+        return Icons.cancel_rounded;
+      case 'no-show':
+        return Icons.no_accounts_rounded;
+      case 'rescheduled':
+        return Icons.calendar_today_rounded;
+      default:
+        return Icons.calendar_today_rounded;
     }
   }
 }

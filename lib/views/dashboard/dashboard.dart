@@ -34,7 +34,7 @@ class Dashboard extends StatelessWidget {
                   selectedLabelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
                   items: [
                     BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Home'),
-                    BottomNavigationBarItem(icon: Icon(Icons.calendar_today_outlined), activeIcon: Icon(Icons.medical_services), label: 'Appointment'),
+                    BottomNavigationBarItem(icon: Icon(Icons.calendar_today_outlined), activeIcon: Icon(Icons.calendar_today), label: 'Appointment'),
                     BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: 'Profile'),
                   ],
                 ),

@@ -5,10 +5,20 @@ import 'package:prime_health_doctors/views/auth/auth_service.dart';
 
 class AppointmentsCtrl extends GetxController {
   var allAppointments = <AppointmentModel>[].obs;
-  var isLoading = false.obs, isRefreshing = false.obs, isLoadingMore = false.obs, hasMore = true;
+  var isLoading = false.obs, isRefreshing = false.obs, isLoadingMore = false.obs, hasMore = true.obs;
   var selectedStatus = ''.obs;
   var currentPage = 1;
   final limit = 20;
+
+  final List<Map<String, dynamic>> statusFilters = [
+    {'label': 'All', 'value': ''},
+    {'label': 'Scheduled', 'value': 'scheduled'},
+    {'label': 'Confirmed', 'value': 'confirmed'},
+    {'label': 'Completed', 'value': 'completed'},
+    {'label': 'Cancelled', 'value': 'cancelled'},
+    {'label': 'No-Show', 'value': 'no-show'},
+    {'label': 'Rescheduled', 'value': 'rescheduled'},
+  ];
 
   AuthService get authService => Get.find<AuthService>();
 
@@ -18,22 +28,41 @@ class AppointmentsCtrl extends GetxController {
     loadAppointments();
   }
 
+  List<AppointmentModel> get filteredAppointments {
+    if (selectedStatus.value.isEmpty) return allAppointments;
+    return allAppointments.where((appointment) => appointment.status.toLowerCase() == selectedStatus.value.toLowerCase()).toList();
+  }
+
+  bool shouldShowLoadMore(int index) {
+    return index >= allAppointments.length && hasMore.value && !isLoadingMore.value;
+  }
+
+  bool shouldShowEndOfList(int index) {
+    return index >= allAppointments.length && !hasMore.value && allAppointments.isNotEmpty;
+  }
+
   Future<void> loadAppointments() async {
     try {
       isLoading.value = true;
       currentPage = 1;
-      hasMore = true;
-      final response = await authService.bookings({"page": currentPage, "limit": limit, "status": selectedStatus.value});
+      hasMore.value = true;
+      final response = await authService.bookings({"page": currentPage, "limit": limit, "status": selectedStatus.value.isEmpty ? null : selectedStatus.value});
       if (response != null && response['docs'] != null) {
         final List<dynamic> data = response['docs'];
         final appointments = data.map((item) => AppointmentModel.fromMap(item)).toList();
         allAppointments.assignAll(appointments);
-        hasMore = data.length >= limit;
+        hasMore.value = data.length >= limit;
+        if (appointments.isEmpty) {
+          Get.snackbar('Info', 'No appointments found', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.blue, colorText: Colors.white);
+        }
       } else {
         allAppointments.clear();
+        hasMore.value = false;
       }
     } catch (e) {
       allAppointments.clear();
+      hasMore.value = false;
+      Get.snackbar('Error', 'Failed to load appointments: ${e.toString()}', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.red, colorText: Colors.white);
     } finally {
       isLoading.value = false;
       isRefreshing.value = false;
@@ -41,19 +70,24 @@ class AppointmentsCtrl extends GetxController {
   }
 
   Future<void> loadMoreAppointments() async {
-    if (isLoadingMore.value || !hasMore) return;
+    if (isLoadingMore.value || !hasMore.value) return;
     try {
       isLoadingMore.value = true;
       currentPage++;
-      final response = await authService.bookings({"page": currentPage, "limit": limit, "status": selectedStatus.value});
+      final response = await authService.bookings({"page": currentPage, "limit": limit, "status": selectedStatus.value.isEmpty ? null : selectedStatus.value});
       if (response != null && response['docs'] != null) {
         final List<dynamic> data = response['docs'];
         final appointments = data.map((item) => AppointmentModel.fromMap(item)).toList();
         allAppointments.addAll(appointments);
-        hasMore = data.length >= limit;
+        hasMore.value = data.length >= limit;
+      } else {
+        hasMore.value = false;
+        currentPage--;
       }
     } catch (e) {
       currentPage--;
+      hasMore.value = false;
+      Get.snackbar('Error', 'Failed to load more appointments', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.red, colorText: Colors.white);
     } finally {
       isLoadingMore.value = false;
     }
@@ -65,7 +99,6 @@ class AppointmentsCtrl extends GetxController {
   }
 
   void filterAppointmentsByStatus(String status) {
-    allAppointments.clear();
     selectedStatus.value = status;
     loadAppointments();
   }
@@ -77,47 +110,99 @@ class AppointmentsCtrl extends GetxController {
 
   Future<void> updateAppointmentStatus(String appointmentId, String newStatus) async {
     try {
+      isLoading.value = true;
       final response = await authService.updateBookingStatus({'bookingId': appointmentId, 'status': newStatus});
-      if (response != null && response['success'] == true) {
+      if (response != null) {
         final index = allAppointments.indexWhere((appointment) => appointment.id == appointmentId);
         if (index != -1) {
           allAppointments[index].status = newStatus;
+          allAppointments.refresh();
         }
         Get.snackbar(
           'Success',
-          'Appointment status changed to ${newStatus.capitalizeFirst}',
+          'Appointment status changed to ${_getStatusDisplayText(newStatus)}',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: _getStatusColor(newStatus),
           colorText: Colors.white,
           borderRadius: 12,
           margin: const EdgeInsets.all(20),
+          duration: const Duration(seconds: 3),
         );
       } else {
         throw Exception('Failed to update appointment status');
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to update appointment: $e', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar(
+        'Error',
+        'Failed to update appointment: ${e.toString()}',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  String _getStatusDisplayText(String status) {
+    switch (status.toLowerCase()) {
+      case 'scheduled':
+        return 'Scheduled';
+      case 'confirmed':
+        return 'Confirmed';
+      case 'completed':
+        return 'Completed';
+      case 'cancelled':
+        return 'Cancelled';
+      case 'no-show':
+        return 'No Show';
+      case 'rescheduled':
+        return 'Rescheduled';
+      default:
+        return status.capitalizeFirst ?? status;
     }
   }
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'confirmed':
+      case 'completed':
         return Colors.green;
       case 'scheduled':
         return Colors.blue;
       case 'pending':
         return Colors.orange;
       case 'cancelled':
-        return Colors.red;
-      case 'completed':
-        return Colors.purple;
       case 'no-show':
-        return Colors.grey;
+        return Colors.red;
       case 'rescheduled':
         return Colors.amber;
       default:
         return Colors.grey;
     }
+  }
+
+  int get todayAppointmentsCount {
+    final now = DateTime.now();
+    return allAppointments.where((appointment) {
+      final appointmentDate = DateTime(appointment.appointmentDate.year, appointment.appointmentDate.month, appointment.appointmentDate.day);
+      final today = DateTime(now.year, now.month, now.day);
+      return appointmentDate == today;
+    }).length;
+  }
+
+  List<AppointmentModel> getAppointmentsForDate(DateTime date) {
+    return allAppointments.where((appointment) {
+      final appointmentDate = DateTime(appointment.appointmentDate.year, appointment.appointmentDate.month, appointment.appointmentDate.day);
+      final targetDate = DateTime(date.year, date.month, date.day);
+      return appointmentDate == targetDate;
+    }).toList();
+  }
+
+  @override
+  void onClose() {
+    allAppointments.clear();
+    super.onClose();
   }
 }

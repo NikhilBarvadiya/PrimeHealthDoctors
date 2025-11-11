@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:prime_health_doctors/utils/theme/light.dart';
 import 'package:prime_health_doctors/views/dashboard/profile/profile_ctrl.dart';
+import 'package:shimmer/shimmer.dart';
 
 class SlotsManagement extends StatefulWidget {
   const SlotsManagement({super.key});
@@ -41,14 +42,14 @@ class _SlotsManagementState extends State<SlotsManagement> {
       backgroundColor: AppTheme.backgroundLight,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: AppTheme.backgroundWhite,
+        backgroundColor: Colors.white,
         title: Text(
           'Time Slots Management',
           style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
         ),
         leading: IconButton(
           style: IconButton.styleFrom(
-            backgroundColor: AppTheme.backgroundLight,
+            backgroundColor: Colors.grey[100],
             padding: const EdgeInsets.all(8),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
@@ -58,54 +59,53 @@ class _SlotsManagementState extends State<SlotsManagement> {
         actions: [
           IconButton(
             style: IconButton.styleFrom(
-              backgroundColor: AppTheme.backgroundLight,
+              backgroundColor: Colors.grey[100],
               padding: const EdgeInsets.all(8),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            icon: Icon(Icons.filter_list_rounded, color: AppTheme.primaryBlue, size: 24),
+            icon: Icon(Icons.filter_list_rounded, color: AppTheme.primaryBlue, size: 20),
             onPressed: _showFiltersDialog,
             tooltip: 'Filter Slots',
           ),
           IconButton(
             style: IconButton.styleFrom(
-              backgroundColor: AppTheme.backgroundLight,
+              backgroundColor: AppTheme.primaryBlue,
               padding: const EdgeInsets.all(8),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            icon: Icon(Icons.add_rounded, color: AppTheme.primaryBlue, size: 24),
+            icon: Icon(Icons.add_rounded, color: Colors.white, size: 20),
             onPressed: _showAddSlotDialog,
             tooltip: 'Add New Slot',
           ),
-          SizedBox(width: 10.0),
+          const SizedBox(width: 10),
         ],
       ),
       body: Obx(() {
-        if (ctrl.isLoadingSlots.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
         return RefreshIndicator(
           onRefresh: () async => await ctrl.loadSlots(),
           child: CustomScrollView(
             controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.only(left: 20, right: 20, bottom: 10),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildInfoCard(),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
                       _buildFiltersSummary(),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 10),
                       _buildSectionHeader('Your Time Slots'),
-                      const SizedBox(height: 8),
-                      Text('Manage your appointment time slots. Recurring slots repeat weekly.', style: GoogleFonts.inter(fontSize: 14, color: AppTheme.textSecondary)),
+                      const SizedBox(height: 4),
+                      Text('Manage your appointment time slots. Recurring slots repeat weekly.', style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary)),
                     ],
                   ),
                 ),
               ),
               _buildSlotsList(),
+              if (ctrl.isLoadingSlots.value) _buildLoadingMoreSlots(),
               const SliverToBoxAdapter(child: SizedBox(height: 20)),
             ],
           ),
@@ -123,8 +123,13 @@ class _SlotsManagementState extends State<SlotsManagement> {
         border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.2)),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.info_outline_rounded, color: AppTheme.primaryBlue, size: 24),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(color: AppTheme.primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+            child: Icon(Icons.info_outline_rounded, color: AppTheme.primaryBlue, size: 20),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -135,10 +140,7 @@ class _SlotsManagementState extends State<SlotsManagement> {
                   style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  'Create time slots for patient appointments. Recurring slots automatically repeat every week.',
-                  style: GoogleFonts.inter(fontSize: 13, color: AppTheme.textSecondary, height: 1.4),
-                ),
+                Text('Create time slots for patient appointments. Recurring slots automatically repeat every week.', style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary)),
               ],
             ),
           ),
@@ -154,13 +156,17 @@ class _SlotsManagementState extends State<SlotsManagement> {
       return Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppTheme.backgroundWhite,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.borderColor),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))],
         ),
         child: Row(
           children: [
-            Icon(Icons.filter_alt_rounded, size: 16, color: AppTheme.primaryBlue),
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(color: AppTheme.primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
+              child: Icon(Icons.filter_alt_rounded, size: 14, color: AppTheme.primaryBlue),
+            ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -176,9 +182,16 @@ class _SlotsManagementState extends State<SlotsManagement> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(color: AppTheme.emergencyRed.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
-                child: Text(
-                  'Clear',
-                  style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: AppTheme.emergencyRed),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.close_rounded, size: 12, color: AppTheme.emergencyRed),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Clear',
+                      style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: AppTheme.emergencyRed),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -200,63 +213,26 @@ class _SlotsManagementState extends State<SlotsManagement> {
   }
 
   String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
+    return DateFormat('MMM dd, yyyy').format(date);
   }
 
   Widget _buildSectionHeader(String title) {
     return Text(
       title,
-      style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+      style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
     );
   }
 
   Widget _buildSlotsList() {
     return Obx(() {
+      if (ctrl.isLoadingSlots.value) {
+        return SliverList(delegate: SliverChildBuilderDelegate((context, index) => _buildSlotShimmerItem(), childCount: 6));
+      }
       if (ctrl.slots.isEmpty) {
         return SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Container(
-              padding: const EdgeInsets.all(40),
-              decoration: BoxDecoration(
-                color: AppTheme.backgroundWhite,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 12, offset: const Offset(0, 4))],
-              ),
-              child: Column(
-                children: [
-                  Icon(Icons.schedule_rounded, size: 64, color: AppTheme.textLight.withOpacity(0.5)),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No Time Slots',
-                    style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600, color: AppTheme.textSecondary),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Add your first time slot to start accepting appointments',
-                    style: GoogleFonts.inter(fontSize: 14, color: AppTheme.textLight),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: _showAddSlotDialog,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryBlue,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: Text(
-                      'Add First Slot',
-                      style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          child: Padding(padding: const EdgeInsets.all(20), child: _buildEmptyState()),
         );
       }
-
       return SliverList(
         delegate: SliverChildBuilderDelegate((context, index) {
           final slot = ctrl.slots[index];
@@ -266,57 +242,206 @@ class _SlotsManagementState extends State<SlotsManagement> {
     });
   }
 
+  Widget _buildSlotShimmerItem() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade200,
+      highlightColor: Colors.grey.shade50,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 120,
+                    height: 16,
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    width: 80,
+                    height: 12,
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
+                  ),
+                  const SizedBox(height: 6),
+                  Container(
+                    width: 60,
+                    height: 12,
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              children: [
+                Container(
+                  width: 60,
+                  height: 20,
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildSlotItem(Map<String, dynamic> slot, int index) {
+    final isRecurring = ctrl.isRecurringSlot(slot);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.backgroundWhite,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))],
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(color: ctrl.isRecurringSlot(slot) ? AppTheme.accentGreen.withOpacity(0.1) : AppTheme.primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-            child: Icon(ctrl.isRecurringSlot(slot) ? Icons.repeat_rounded : Icons.event_rounded, color: ctrl.isRecurringSlot(slot) ? AppTheme.accentGreen : AppTheme.primaryBlue, size: 24),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => _showSlotDetails(slot),
+          child: Padding(
+            padding: const EdgeInsets.only(left: 16, top: 10, bottom: 10),
+            child: Row(
               children: [
-                Text(
-                  '${ctrl.formatSlotTime(slot['startTime'])} - ${ctrl.formatSlotTime(slot['endTime'])}',
-                  style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${ctrl.formatSlotTime(slot['startTime'])} - ${ctrl.formatSlotTime(slot['endTime'])}',
+                        style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                      ),
+                      const SizedBox(height: 4),
+                      Text('Date: ${ctrl.formatSlotDate(slot['startTime'])}', style: GoogleFonts.inter(fontSize: 13, color: AppTheme.textSecondary)),
+                      const SizedBox(height: 4),
+                      Text('Duration: ${_calculateDuration(slot['startTime'], slot['endTime'])}', style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textLight)),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 4),
-                Text('Date: ${ctrl.formatSlotDate(slot['startTime'])}', style: GoogleFonts.inter(fontSize: 13, color: AppTheme.textSecondary)),
-                const SizedBox(height: 4),
-                Text('Duration: ${_calculateDuration(slot['startTime'], slot['endTime'])}', style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textLight)),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    if (isRecurring)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(color: AppTheme.successGreen.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.repeat_rounded, size: 10, color: AppTheme.successGreen),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Recurring',
+                              style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: AppTheme.successGreen),
+                            ),
+                          ],
+                        ),
+                      ),
+                    if (!isRecurring)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(color: AppTheme.primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.event_rounded, size: 10, color: AppTheme.primaryBlue),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Event',
+                              style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: AppTheme.primaryBlue),
+                            ),
+                          ],
+                        ),
+                      ),
+                    const SizedBox(height: 8),
+                    IconButton(
+                      style: IconButton.styleFrom(
+                        backgroundColor: AppTheme.emergencyRed.withOpacity(.1),
+                        padding: const EdgeInsets.all(8),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      icon: Icon(Icons.delete_outline_rounded, color: AppTheme.emergencyRed, size: 20),
+                      onPressed: () => _showDeleteSlotDialog(index),
+                      tooltip: 'Delete Slot',
+                    ),
+                  ],
+                ).paddingOnly(right: 10),
               ],
             ),
           ),
-          Column(
-            children: [
-              if (ctrl.isRecurringSlot(slot))
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(color: AppTheme.accentGreen.withOpacity(0.1), borderRadius: BorderRadius.circular(4)),
-                  child: Text(
-                    'Recurring',
-                    style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: AppTheme.accentGreen),
-                  ),
-                ),
-              IconButton(
-                onPressed: () => _showDeleteSlotDialog(index),
-                icon: Icon(Icons.delete, color: Colors.red),
-              ),
-            ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Container(
+      padding: const EdgeInsets.all(40),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))],
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(color: AppTheme.backgroundLight, shape: BoxShape.circle),
+            child: Icon(Icons.schedule_rounded, size: 40, color: AppTheme.textLight),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'No Time Slots',
+            style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600, color: AppTheme.textSecondary),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Add your first time slot to start accepting appointments',
+            style: GoogleFonts.inter(fontSize: 14, color: AppTheme.textLight),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: _showAddSlotDialog,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryBlue,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: Text('Add First Slot', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingMoreSlots() {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Center(
+          child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primaryBlue)),
+        ),
       ),
     );
   }
@@ -327,7 +452,6 @@ class _SlotsManagementState extends State<SlotsManagement> {
       final end = DateTime.parse(endTime);
       final difference = end.difference(start);
       final minutes = difference.inMinutes;
-
       if (minutes < 60) {
         return '$minutes min';
       } else {
@@ -340,12 +464,87 @@ class _SlotsManagementState extends State<SlotsManagement> {
     }
   }
 
+  void _showSlotDetails(Map<String, dynamic> slot) {
+    final isRecurring = ctrl.isRecurringSlot(slot);
+    Get.dialog(
+      Dialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(color: isRecurring ? AppTheme.successGreen.withOpacity(0.1) : AppTheme.primaryBlue.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                child: Icon(isRecurring ? Icons.repeat_rounded : Icons.event_rounded, color: isRecurring ? AppTheme.successGreen : AppTheme.primaryBlue, size: 30),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Slot Details',
+                style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
+              ),
+              const SizedBox(height: 16),
+              _buildDetailItem('Time', '${ctrl.formatSlotTime(slot['startTime'])} - ${ctrl.formatSlotTime(slot['endTime'])}'),
+              const SizedBox(height: 12),
+              _buildDetailItem('Date', ctrl.formatSlotDate(slot['startTime'])),
+              const SizedBox(height: 12),
+              _buildDetailItem('Duration', _calculateDuration(slot['startTime'], slot['endTime'])),
+              const SizedBox(height: 12),
+              _buildDetailItem('Type', isRecurring ? 'Recurring (Weekly)' : 'One-time'),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Get.back(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryBlue,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: Text('Close', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailItem(String label, String value) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(color: AppTheme.backgroundLight, borderRadius: BorderRadius.circular(8)),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: GoogleFonts.inter(fontSize: 14, color: AppTheme.textSecondary, fontWeight: FontWeight.w500),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: GoogleFonts.inter(fontSize: 14, color: AppTheme.textPrimary, fontWeight: FontWeight.w600),
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showFiltersDialog() {
     DateTime? startDate = ctrl.startDate.value;
     DateTime? endDate = ctrl.endDate.value;
-
     Get.dialog(
       Dialog(
+        backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: StatefulBuilder(
           builder: (context, setState) {
@@ -354,6 +553,12 @@ class _SlotsManagementState extends State<SlotsManagement> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(color: AppTheme.primaryBlue.withOpacity(0.1), shape: BoxShape.circle),
+                    child: Icon(Icons.filter_alt_rounded, color: AppTheme.primaryBlue, size: 40),
+                  ),
+                  const SizedBox(height: 16),
                   Text(
                     'Filter Slots',
                     style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
@@ -417,11 +622,12 @@ class _SlotsManagementState extends State<SlotsManagement> {
                         child: OutlinedButton(
                           onPressed: () => Get.back(),
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            foregroundColor: AppTheme.textSecondary,
                             side: BorderSide(color: AppTheme.borderColor),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
-                          child: Text('Cancel', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                          child: Text('Cancel', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -433,13 +639,11 @@ class _SlotsManagementState extends State<SlotsManagement> {
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppTheme.primaryBlue,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
-                          child: Text(
-                            'Apply Filters',
-                            style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: Colors.white),
-                          ),
+                          child: Text('Apply Filters', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
                         ),
                       ),
                     ],

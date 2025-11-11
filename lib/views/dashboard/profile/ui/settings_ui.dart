@@ -132,6 +132,7 @@ class Settings extends StatelessWidget {
 
   Widget _buildSettingsTile({required IconData icon, required String title, required String subtitle, VoidCallback? onTap, String? value, Color? color}) {
     return ListTile(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       leading: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(color: (color ?? AppTheme.primaryBlue).withOpacity(0.1), borderRadius: BorderRadius.circular(12)),

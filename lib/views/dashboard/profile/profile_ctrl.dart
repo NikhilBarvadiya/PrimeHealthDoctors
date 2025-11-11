@@ -179,7 +179,7 @@ class ProfileCtrl extends GetxController {
     );
     selectedService.value = data['services']?["_id"] ?? '';
     selectedServiceName.value = data['services']?["name"] ?? '';
-    if(selectedService.value.isNotEmpty) {
+    if (selectedService.value.isNotEmpty) {
       final getSpecialities = await authService.getSpecialities(selectedService.value);
       if (getSpecialities.isNotEmpty) {
         int index = getSpecialities.indexWhere((e) => e["_id"].toString() == data['specialty'].toString());
