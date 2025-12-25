@@ -250,7 +250,7 @@ class Profile extends StatelessWidget {
       onTap: () => _showServiceSelection(context, ctrl),
       decoration: InputDecoration(
         hintText: 'Select your medical service',
-        hintStyle: GoogleFonts.inter(color: AppTheme.textLight, fontWeight: FontWeight.w400),
+        hintStyle: GoogleFonts.inter(fontSize: 14, color: AppTheme.textLight, fontWeight: FontWeight.w400),
         suffixIcon: Icon(Icons.arrow_drop_down_rounded, color: AppTheme.textSecondary, size: 22),
         filled: true,
         fillColor: AppTheme.backgroundWhite,
@@ -333,7 +333,7 @@ class Profile extends StatelessWidget {
       onTap: () => _showSpecialtySelection(context, ctrl),
       decoration: InputDecoration(
         hintText: 'Select your medical specialty',
-        hintStyle: GoogleFonts.inter(color: AppTheme.textLight, fontWeight: FontWeight.w400),
+        hintStyle: GoogleFonts.inter(fontSize: 14, color: AppTheme.textLight, fontWeight: FontWeight.w400),
         suffixIcon: Icon(Icons.arrow_drop_down_rounded, color: AppTheme.textSecondary, size: 22),
         filled: true,
         fillColor: AppTheme.backgroundWhite,
@@ -459,7 +459,7 @@ class Profile extends StatelessWidget {
                 const SizedBox(height: 4),
                 TextFormField(
                   controller: ctrl.consultationFeeController,
-                  keyboardType: TextInputType.number,
+                  keyboardType: TextInputType.numberWithOptions(signed: true),
                   style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: AppTheme.textPrimary),
                   decoration: InputDecoration(
                     hintText: '500',
@@ -497,7 +497,7 @@ class Profile extends StatelessWidget {
                 const SizedBox(height: 4),
                 TextFormField(
                   controller: ctrl.followUpFeeController,
-                  keyboardType: TextInputType.number,
+                  keyboardType: TextInputType.numberWithOptions(signed: true),
                   style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: AppTheme.textPrimary),
                   decoration: InputDecoration(
                     hintText: '300',
@@ -935,6 +935,7 @@ class Profile extends StatelessWidget {
                       ? TextInputType.emailAddress
                       : TextInputType.text,
                   maxLines: maxLines,
+                  textInputAction: TextInputAction.done,
                   style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w500, color: AppTheme.textPrimary),
                   decoration: InputDecoration(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

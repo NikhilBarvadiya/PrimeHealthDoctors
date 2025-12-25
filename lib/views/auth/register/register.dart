@@ -483,7 +483,7 @@ class Register extends StatelessWidget {
                   const SizedBox(height: 4),
                   TextFormField(
                     controller: ctrl.consultationFeeCtrl,
-                    keyboardType: TextInputType.number,
+                    keyboardType: TextInputType.numberWithOptions(signed: true),
                     style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: AppTheme.textPrimary),
                     decoration: InputDecoration(
                       hintText: '500',
@@ -521,7 +521,7 @@ class Register extends StatelessWidget {
                   const SizedBox(height: 4),
                   TextFormField(
                     controller: ctrl.followUpFeeCtrl,
-                    keyboardType: TextInputType.number,
+                    keyboardType: TextInputType.numberWithOptions(signed: true),
                     style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: AppTheme.textPrimary),
                     decoration: InputDecoration(
                       hintText: '300',
