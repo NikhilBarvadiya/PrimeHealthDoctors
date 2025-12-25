@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:prime_health_doctors/models/appointment_model.dart';
+import 'package:prime_health_doctors/utils/toaster.dart';
 import 'package:prime_health_doctors/views/auth/auth_service.dart';
 
 class AppointmentsCtrl extends GetxController {
@@ -53,7 +53,7 @@ class AppointmentsCtrl extends GetxController {
         allAppointments.assignAll(appointments);
         hasMore.value = data.length >= limit;
         if (appointments.isEmpty) {
-          Get.snackbar('Info', 'No appointments found', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.blue, colorText: Colors.white);
+          toaster.info("No appointments found");
         }
       } else {
         allAppointments.clear();
@@ -62,7 +62,7 @@ class AppointmentsCtrl extends GetxController {
     } catch (e) {
       allAppointments.clear();
       hasMore.value = false;
-      Get.snackbar('Error', 'Failed to load appointments: ${e.toString()}', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.red, colorText: Colors.white);
+      toaster.error('Failed to load appointments: ${e.toString()}');
     } finally {
       isLoading.value = false;
       isRefreshing.value = false;
@@ -87,7 +87,7 @@ class AppointmentsCtrl extends GetxController {
     } catch (e) {
       currentPage--;
       hasMore.value = false;
-      Get.snackbar('Error', 'Failed to load more appointments', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.red, colorText: Colors.white);
+      toaster.error('Failed to load appointments');
     } finally {
       isLoadingMore.value = false;
     }
@@ -118,28 +118,12 @@ class AppointmentsCtrl extends GetxController {
           allAppointments[index].status = newStatus;
           allAppointments.refresh();
         }
-        Get.snackbar(
-          'Success',
-          'Appointment status changed to ${_getStatusDisplayText(newStatus)}',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: _getStatusColor(newStatus),
-          colorText: Colors.white,
-          borderRadius: 12,
-          margin: const EdgeInsets.all(20),
-          duration: const Duration(seconds: 3),
-        );
+        toaster.success('Appointment status changed to ${_getStatusDisplayText(newStatus)}');
       } else {
         throw Exception('Failed to update appointment status');
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to update appointment: ${e.toString()}',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 3),
-      );
+      toaster.error('Failed to update appointment: ${e.toString()}');
     } finally {
       isLoading.value = false;
     }
@@ -161,25 +145,6 @@ class AppointmentsCtrl extends GetxController {
         return 'Rescheduled';
       default:
         return status.capitalizeFirst ?? status;
-    }
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'confirmed':
-      case 'completed':
-        return Colors.green;
-      case 'scheduled':
-        return Colors.blue;
-      case 'pending':
-        return Colors.orange;
-      case 'cancelled':
-      case 'no-show':
-        return Colors.red;
-      case 'rescheduled':
-        return Colors.amber;
-      default:
-        return Colors.grey;
     }
   }
 

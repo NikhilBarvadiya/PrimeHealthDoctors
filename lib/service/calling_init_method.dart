@@ -40,7 +40,7 @@ class CallingInitMethod {
     };
 
     CallingService().onCallAccepted = (channelName) {
-      if (_isCallingViewOpen) Get.back();
+      if (_isCallingViewOpen) Get.close(1);
       _navigateToCalling(
         channelName,
         _incomingCall?.callType ?? CallType.video,
@@ -73,7 +73,7 @@ class CallingInitMethod {
 
     CallingService().onCallRejected = (callId) {
       if (_isCallingViewOpen) {
-        Get.back();
+        Get.close(1);
       } else {
         BuildContext? context = navigatorKey.currentContext;
         if (context != null) {
@@ -85,7 +85,7 @@ class CallingInitMethod {
     };
 
     CallingService().onCallEnded = (senderName) {
-      if (_isCallingViewOpen) Get.back();
+      if (_isCallingViewOpen) Get.close(1);
       _incomingCall = null;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$senderName ended the call')));
     };
@@ -99,7 +99,7 @@ class CallingInitMethod {
         return IncomingCallDialog(
           callData: callData,
           onAccept: () {
-            Get.back();
+            Get.close(1);
             _navigateToCalling(
               callData.channelName,
               callData.callType,
@@ -176,7 +176,7 @@ class CallingInitMethod {
                 ),
               );
             }
-            Get.back();
+            Get.close(1);
             _incomingCall = null;
             _isCallingViewOpen = false;
           },

@@ -34,7 +34,7 @@ class Settings extends StatelessWidget {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 icon: Icon(Icons.arrow_back_rounded, color: AppTheme.textPrimary, size: 24),
-                onPressed: () => Get.back(),
+                onPressed: () => Get.close(1),
               ),
             ),
             SliverToBoxAdapter(
@@ -70,18 +70,6 @@ class Settings extends StatelessWidget {
                         _buildSettingsTile(icon: Icons.help_rounded, title: 'Help & Support', subtitle: 'Get help using the app', onTap: () => _showPolicyPage('Help & Support', _helpSupportContent)),
                         _buildDivider(),
                         _buildSettingsTile(icon: Icons.contact_support_rounded, title: 'Contact Us', subtitle: 'Reach out to our support team', onTap: () => _showContactDialog()),
-                      ],
-                    ),
-                    const SizedBox(height: 32),
-                    _buildSectionHeader('About'),
-                    const SizedBox(height: 16),
-                    _buildSettingsCard(
-                      children: [
-                        _buildSettingsTile(icon: Icons.info_rounded, title: 'App Version', subtitle: 'Current version information', value: '1.0.0 (Build 123)', onTap: () {}),
-                        _buildDivider(),
-                        _buildSettingsTile(icon: Icons.update_rounded, title: 'Check for Updates', subtitle: 'Latest version available', onTap: () => _checkForUpdates()),
-                        _buildDivider(),
-                        _buildSettingsTile(icon: Icons.rate_review_rounded, title: 'Rate App', subtitle: 'Share your experience', onTap: () => _rateApp()),
                       ],
                     ),
                     const SizedBox(height: 32),
@@ -213,7 +201,7 @@ class Settings extends StatelessWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             icon: Icon(Icons.arrow_back_rounded, color: AppTheme.textPrimary, size: 24),
-            onPressed: () => Get.back(),
+            onPressed: () => Get.close(1),
           ),
         ),
         body: SingleChildScrollView(
@@ -259,7 +247,7 @@ class Settings extends StatelessWidget {
               _buildContactInfo('Hours', 'Mon - Fri, 9:00 AM - 6:00 PM', Icons.access_time_rounded),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: () => Get.back(),
+                onPressed: () => Get.close(1),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primaryBlue,
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
@@ -305,14 +293,6 @@ class Settings extends StatelessWidget {
     );
   }
 
-  void _checkForUpdates() {
-    Get.snackbar('Update Check', 'You are using the latest version of PrimeHealth Doctors', snackPosition: SnackPosition.BOTTOM, backgroundColor: AppTheme.accentGreen, colorText: Colors.white);
-  }
-
-  void _rateApp() {
-    Get.snackbar('Rate App', 'Thank you for your feedback! Rating feature coming soon.', snackPosition: SnackPosition.BOTTOM, backgroundColor: AppTheme.primaryBlue, colorText: Colors.white);
-  }
-
   void _showLogoutDialog(ProfileCtrl ctrl) {
     Get.dialog(
       Dialog(
@@ -343,7 +323,7 @@ class Settings extends StatelessWidget {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => Get.back(),
+                      onPressed: () => Get.close(1),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -409,7 +389,7 @@ class Settings extends StatelessWidget {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => Get.back(),
+                      onPressed: () => Get.close(1),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

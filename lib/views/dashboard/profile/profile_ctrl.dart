@@ -42,7 +42,6 @@ class ProfileCtrl extends GetxController {
   @override
   void onInit() {
     loadUserData();
-    loadSpecialities();
     loadServices();
     super.onInit();
   }
@@ -75,7 +74,7 @@ class ProfileCtrl extends GetxController {
   Future<void> loadSpecialities() async {
     isSpecialtyLoading.value = true;
     try {
-      final data = await authService.getSpecialities("");
+      final data = await authService.getSpecialities(selectedService.value);
       specialities.assignAll(data);
     } finally {
       isSpecialtyLoading.value = false;

@@ -54,7 +54,7 @@ class _SlotsManagementState extends State<SlotsManagement> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
           icon: Icon(Icons.arrow_back_rounded, color: AppTheme.textPrimary, size: 24),
-          onPressed: () => Get.back(),
+          onPressed: () => Get.close(1),
         ),
         actions: [
           IconButton(
@@ -498,7 +498,7 @@ class _SlotsManagementState extends State<SlotsManagement> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () => Get.back(),
+                  onPressed: () => Get.close(1),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryBlue,
                     foregroundColor: Colors.white,
@@ -620,7 +620,7 @@ class _SlotsManagementState extends State<SlotsManagement> {
                     children: [
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: () => Get.back(),
+                          onPressed: () => Get.close(1),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppTheme.textSecondary,
                             side: BorderSide(color: AppTheme.borderColor),
@@ -635,7 +635,7 @@ class _SlotsManagementState extends State<SlotsManagement> {
                         child: ElevatedButton(
                           onPressed: () {
                             ctrl.applySlotsFilters(start: startDate, end: endDate);
-                            Get.back();
+                            Get.close(1);
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppTheme.primaryBlue,
@@ -702,7 +702,7 @@ class _SlotsManagementState extends State<SlotsManagement> {
                     children: [
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: () => Get.back(),
+                          onPressed: () => Get.close(1),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -717,7 +717,7 @@ class _SlotsManagementState extends State<SlotsManagement> {
                           onPressed: () {
                             final newSlot = {'startTime': _createDateTimeString(selectedDate, startTime), 'endTime': _createDateTimeString(selectedDate, endTime), 'isRecurring': isRecurring};
                             _addNewSlot(newSlot);
-                            Get.back();
+                            Get.close(1);
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppTheme.primaryBlue,
@@ -771,7 +771,7 @@ class _SlotsManagementState extends State<SlotsManagement> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => Get.back(),
+                      onPressed: () => Get.close(1),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -785,7 +785,7 @@ class _SlotsManagementState extends State<SlotsManagement> {
                     child: ElevatedButton(
                       onPressed: () {
                         _deleteSlot(index);
-                        Get.back();
+                        Get.close(1);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.emergencyRed,

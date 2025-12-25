@@ -466,7 +466,7 @@ class Appointments extends StatelessWidget {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => Get.back(),
+                      onPressed: () => Get.close(1),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppTheme.textSecondary,
                         side: BorderSide(color: AppTheme.borderColor),
@@ -480,7 +480,7 @@ class Appointments extends StatelessWidget {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        Get.back();
+                        Get.close(1);
                         ctrl.updateAppointmentStatus(appointment.id, 'confirmed');
                       },
                       style: ElevatedButton.styleFrom(
@@ -533,7 +533,7 @@ class Appointments extends StatelessWidget {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => Get.back(),
+                      onPressed: () => Get.close(1),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppTheme.textSecondary,
                         side: BorderSide(color: AppTheme.borderColor),
@@ -547,7 +547,7 @@ class Appointments extends StatelessWidget {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        Get.back();
+                        Get.close(1);
                         ctrl.updateAppointmentStatus(appointment.id, 'cancelled');
                       },
                       style: ElevatedButton.styleFrom(
@@ -600,7 +600,7 @@ class Appointments extends StatelessWidget {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => Get.back(),
+                      onPressed: () => Get.close(1),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppTheme.textSecondary,
                         side: BorderSide(color: AppTheme.borderColor),
@@ -614,7 +614,7 @@ class Appointments extends StatelessWidget {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        Get.back();
+                        Get.close(1);
                         ctrl.updateAppointmentStatus(appointment.id, 'completed');
                       },
                       style: ElevatedButton.styleFrom(

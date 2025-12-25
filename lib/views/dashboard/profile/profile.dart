@@ -293,10 +293,33 @@ class Profile extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Obx(() {
+                  if (ctrl.selectedService.value.isEmpty) {
+                    return _buildInfoField('Please select a service first');
+                  }
                   return ctrl.isSpecialtyLoading.value ? _buildLoadingField('Loading specialities...') : _buildSpecialtyDropdown(context, ctrl);
                 }),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoField(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      decoration: BoxDecoration(
+        color: AppTheme.backgroundLight,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.borderColor),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.info_outline_rounded, color: AppTheme.textLight, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(text, style: GoogleFonts.inter(fontSize: 14, color: AppTheme.textSecondary)),
           ),
         ],
       ),
@@ -825,6 +848,7 @@ class Profile extends StatelessWidget {
     return GestureDetector(
       onTap: ctrl.addCertification,
       child: Container(
+        width: double.infinity,
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(

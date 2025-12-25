@@ -821,7 +821,7 @@ class Register extends StatelessWidget {
           shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
         ),
         icon: const Icon(Icons.arrow_back_ios_new, color: Color(0xFF374151), size: 20),
-        onPressed: () => Get.back(),
+        onPressed: () => Get.close(1),
       ),
     );
   }

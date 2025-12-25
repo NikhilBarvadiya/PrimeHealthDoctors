@@ -3,6 +3,7 @@ import 'package:prime_health_doctors/models/appointment_model.dart';
 import 'package:prime_health_doctors/models/patient_model.dart';
 import 'package:prime_health_doctors/utils/config/session.dart';
 import 'package:prime_health_doctors/utils/storage.dart';
+import 'package:prime_health_doctors/utils/toaster.dart';
 import 'package:prime_health_doctors/views/auth/auth_service.dart';
 
 class HomeCtrl extends GetxController {
@@ -27,7 +28,7 @@ class HomeCtrl extends GetxController {
         userName.value = userData['name'] ?? "Dr. John Smith";
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to load user data: $e', snackPosition: SnackPosition.BOTTOM);
+      toaster.error('Failed to load user data: $e');
     }
   }
 
@@ -50,7 +51,7 @@ class HomeCtrl extends GetxController {
         todayAppointments.clear();
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to load appointment data: $e', snackPosition: SnackPosition.BOTTOM);
+      toaster.error('Failed to load appointment data: $e');
       todayAppointments.clear();
     } finally {
       isLoading.value = false;
@@ -69,7 +70,7 @@ class HomeCtrl extends GetxController {
         consultedPatients.clear();
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to load consulted patients: $e', snackPosition: SnackPosition.BOTTOM);
+      toaster.error('Failed to load consulted patients: $e');
       consultedPatients.clear();
     } finally {
       isLoadingPatients.value = false;

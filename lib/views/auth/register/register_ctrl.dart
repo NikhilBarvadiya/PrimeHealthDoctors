@@ -158,7 +158,7 @@ class RegisterCtrl extends GetxController {
       final success = await authService.registerDoctor(request);
       if (success) {
         _clearForm();
-        Get.back();
+        Get.close(1);
       }
     } finally {
       isLoading.value = false;

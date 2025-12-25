@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:prime_health_doctors/utils/toaster.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:prime_health_doctors/models/appointment_model.dart';
 import 'package:prime_health_doctors/models/calling_model.dart';
@@ -48,7 +49,7 @@ class _AppointmentDetailsState extends State<AppointmentDetails> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               icon: Icon(Icons.arrow_back_rounded, color: AppTheme.textPrimary, size: 24),
-              onPressed: () => Get.back(),
+              onPressed: () => Get.close(1),
             ),
             actions: [
               IconButton(
@@ -514,7 +515,7 @@ class _AppointmentDetailsState extends State<AppointmentDetails> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => Get.back(),
+                      onPressed: () => Get.close(1),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppTheme.textSecondary,
                         side: BorderSide(color: AppTheme.borderColor),
@@ -528,7 +529,7 @@ class _AppointmentDetailsState extends State<AppointmentDetails> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        Get.back();
+                        Get.close(1);
                         _updateAppointmentStatus('confirmed', 'Appointment confirmed successfully');
                       },
                       style: ElevatedButton.styleFrom(
@@ -581,7 +582,7 @@ class _AppointmentDetailsState extends State<AppointmentDetails> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => Get.back(),
+                      onPressed: () => Get.close(1),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppTheme.textSecondary,
                         side: BorderSide(color: AppTheme.borderColor),
@@ -595,7 +596,7 @@ class _AppointmentDetailsState extends State<AppointmentDetails> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        Get.back();
+                        Get.close(1);
                         _updateAppointmentStatus('cancelled', 'Appointment cancelled successfully');
                       },
                       style: ElevatedButton.styleFrom(
@@ -648,7 +649,7 @@ class _AppointmentDetailsState extends State<AppointmentDetails> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => Get.back(),
+                      onPressed: () => Get.close(1),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppTheme.textSecondary,
                         side: BorderSide(color: AppTheme.borderColor),
@@ -662,7 +663,7 @@ class _AppointmentDetailsState extends State<AppointmentDetails> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        Get.back();
+                        Get.close(1);
                         _updateAppointmentStatus('completed', 'Consultation completed successfully');
                       },
                       style: ElevatedButton.styleFrom(
@@ -691,27 +692,10 @@ class _AppointmentDetailsState extends State<AppointmentDetails> {
       final response = await authService.updateBookingStatus({'bookingId': widget.appointment.id, 'status': status});
       if (response != null) {
         widget.appointment.status = status;
-        Get.snackbar(
-          'Success',
-          successMessage,
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: AppTheme.successGreen,
-          colorText: Colors.white,
-          borderRadius: 12,
-          duration: const Duration(seconds: 3),
-        );
-        setState(() {});
+        toaster.success(successMessage);
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to update appointment status',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppTheme.emergencyRed,
-        colorText: Colors.white,
-        borderRadius: 12,
-        duration: const Duration(seconds: 3),
-      );
+      toaster.error(e.toString());
     } finally {
       setState(() => isLoading = false);
     }
