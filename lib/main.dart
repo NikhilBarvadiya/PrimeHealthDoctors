@@ -49,7 +49,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    CallingInitMethod().initData();
+    Future.delayed(Duration.zero, () async => await CallingInitMethod().initData());
   }
 
   @override

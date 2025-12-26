@@ -12,7 +12,7 @@ class AuthService extends GetxService {
   Future<List<dynamic>> getServices() async {
     try {
       final response = await ApiManager().call(APIIndex.getServices, {}, ApiType.post);
-      if (response.status != 200 || response.data == null) {
+      if (response.status != 200 || response.data == null || response.data == 0) {
         toaster.warning(response.message ?? 'Failed to load services');
         return [];
       }
@@ -26,7 +26,7 @@ class AuthService extends GetxService {
   Future<List<dynamic>> getSpecialities(String serviceId) async {
     try {
       final response = await ApiManager().call(APIIndex.specialities, {"serviceId": serviceId}, ApiType.post);
-      if (response.status != 200 || response.data == null) {
+      if (response.status != 200 || response.data == null || response.data == 0) {
         toaster.warning(response.message ?? 'Failed to load specialities');
         return [];
       }
@@ -55,11 +55,17 @@ class AuthService extends GetxService {
   Future<Map<String, dynamic>?> login(Map<String, dynamic> request) async {
     try {
       final response = await ApiManager().call(APIIndex.login, request, ApiType.post);
-      if (response.status != 200 || response.data == null) {
+      if (response.status != 200 || response.data == null || response.data == 0) {
         toaster.warning(response.message ?? 'Failed to login');
         return null;
       }
       if (response.message == "OTP sent to mobile number") {
+        final doctorId = response.data['doctor']["id"] ?? response.data['doctor']["_id"];
+        final otpRequest = {'mobileNo': request["mobileNo"], 'doctorId': doctorId};
+        final otpSent = await sendOTP(otpRequest);
+        if (otpSent) {
+          Get.toNamed(AppRouteNames.verifyOtp, arguments: {'mobileNo': request["mobileNo"], 'machineId': request["machineId"], 'doctorId': doctorId});
+        }
         return response.data;
       } else {
         await write(AppSession.token, response.data!["token"]);
@@ -92,7 +98,7 @@ class AuthService extends GetxService {
   Future<bool> verifyOTP(Map<String, dynamic> request) async {
     try {
       final response = await ApiManager().call(APIIndex.verifyOTP, request, ApiType.post);
-      if (response.status == 200 && response.data != null) {
+      if (response.status == 200 && response.data != null && response.data != 0) {
         if (response.data?['token'] != null) {
           await write(AppSession.token, response.data!["token"]);
           await write(AppSession.userData, response.data!["doctor"]);
@@ -111,7 +117,7 @@ class AuthService extends GetxService {
   Future<Map<String, dynamic>?> getProfile() async {
     try {
       final response = await ApiManager().call(APIIndex.getProfile, {}, ApiType.post);
-      if (response.status == 200 && response.data != null) {
+      if (response.status == 200 && response.data != null && response.data != 0) {
         return response.data;
       } else {
         toaster.warning(response.message ?? 'Failed to load profile');
@@ -127,7 +133,7 @@ class AuthService extends GetxService {
     try {
       final response = await ApiManager().call(APIIndex.updateProfile, request, ApiType.post);
       if (response.status == 200) {
-        if (response.data != null) {
+        if (response.data != null && response.data != 0) {
           await write(AppSession.userData, response.data);
         }
         toaster.success(response.message ?? 'Profile updated successfully');
@@ -145,13 +151,15 @@ class AuthService extends GetxService {
   Future<dynamic> getSlots(Map<String, dynamic> request) async {
     try {
       final response = await ApiManager().call(APIIndex.slots, request, ApiType.post);
-      if (response.status == 200 && response.data != null) {
+      print(response);
+      if (response.status == 200 && response.data != null && response.data != 0) {
         return response.data;
       } else {
         toaster.warning(response.message ?? 'Failed to load slots');
         return [];
       }
     } catch (err) {
+      print(err);
       toaster.error('Slots loading failed: ${err.toString()}');
       return [];
     }
@@ -192,7 +200,7 @@ class AuthService extends GetxService {
   Future<dynamic> getConsultedPatients() async {
     try {
       final response = await ApiManager().call(APIIndex.patientsConsulted, {}, ApiType.post);
-      if (response.status == 200 && response.data != null) {
+      if (response.status == 200 && response.data != null && response.data != 0) {
         return response.data;
       } else {
         toaster.warning(response.message ?? 'Failed to load bookings');
@@ -207,7 +215,7 @@ class AuthService extends GetxService {
   Future<dynamic> bookings(Map<String, dynamic> request) async {
     try {
       final response = await ApiManager().call(APIIndex.bookings, request, ApiType.post);
-      if (response.status == 200 && response.data != null) {
+      if (response.status == 200 && response.data != null && response.data != 0) {
         return response.data;
       } else {
         toaster.warning(response.message ?? 'Failed to load bookings');
@@ -222,7 +230,7 @@ class AuthService extends GetxService {
   Future<Map<String, dynamic>?> updateBookingStatus(Map<String, dynamic> request) async {
     try {
       final response = await ApiManager().call(APIIndex.updateBookingStatus, request, ApiType.post);
-      if (response.status == 200 && response.data != null) {
+      if (response.status == 200 && response.data != null && response.data != 0) {
         return response.data;
       } else {
         toaster.warning(response.message ?? 'Failed to update appointment status');
@@ -237,7 +245,7 @@ class AuthService extends GetxService {
   Future<Map<String, dynamic>?> getCalls(Map<String, dynamic> request) async {
     try {
       final response = await ApiManager().call(APIIndex.getCalls, request, ApiType.post);
-      if (response.status == 200 && response.data != null) {
+      if (response.status == 200 && response.data != null && response.data != 0) {
         return response.data;
       } else {
         toaster.warning(response.message ?? 'Failed to get call history');

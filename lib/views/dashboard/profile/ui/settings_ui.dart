@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:prime_health_doctors/utils/decoration.dart';
 import 'package:prime_health_doctors/utils/routes/route_name.dart';
 import 'package:prime_health_doctors/utils/theme/light.dart';
 import 'package:prime_health_doctors/views/dashboard/profile/profile_ctrl.dart';
@@ -28,11 +29,12 @@ class Settings extends StatelessWidget {
               ),
               leading: IconButton(
                 style: IconButton.styleFrom(
-                  backgroundColor: AppTheme.backgroundLight,
                   padding: const EdgeInsets.all(8),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  backgroundColor: Colors.white,
+                  side: BorderSide(color: decoration.colorScheme.primary.withOpacity(.1)),
                 ),
-                icon: Icon(Icons.arrow_back_rounded, color: AppTheme.textPrimary, size: 24),
+                icon: Icon(Icons.arrow_back_rounded, color: decoration.colorScheme.primary, size: 24),
                 onPressed: () => Get.close(1),
               ),
             ),
@@ -189,11 +191,12 @@ class Settings extends StatelessWidget {
           ),
           leading: IconButton(
             style: IconButton.styleFrom(
-              backgroundColor: AppTheme.backgroundLight,
               padding: const EdgeInsets.all(8),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              backgroundColor: Colors.white,
+              side: BorderSide(color: decoration.colorScheme.primary.withOpacity(.1)),
             ),
-            icon: Icon(Icons.arrow_back_rounded, color: AppTheme.textPrimary, size: 24),
+            icon: Icon(Icons.arrow_back_rounded, color: decoration.colorScheme.primary, size: 24),
             onPressed: () => Get.close(1),
           ),
         ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:prime_health_doctors/models/user_model.dart';
 import 'package:prime_health_doctors/utils/config/session.dart';
 import 'package:prime_health_doctors/utils/helper.dart';
@@ -16,8 +17,6 @@ class ProfileCtrl extends GetxController {
   var user = UserModel().obs;
   var isLoading = false.obs, isSpecialtyLoading = false.obs, isLoadingSlots = false.obs, hasMoreSlots = true.obs;
   var isServicesLoading = false.obs;
-  bool isEditMode = false;
-
   var avatar = Rx<File?>(null), logo = Rx<File?>(null);
   var certificationDocuments = <int, File>{}.obs;
 
@@ -98,7 +97,12 @@ class ProfileCtrl extends GetxController {
       isLoadingSlots.value = true;
     }
     try {
-      final slotsData = await authService.getSlots({"page": currentPage.value, "limit": 20, "startDate": startDate.value, "endDate": endDate.value});
+      final slotsData = await authService.getSlots({
+        "page": currentPage.value,
+        "limit": 20,
+        "startDate": startDate.value == null ? null : DateFormat("yyyy-MM-dd").format(startDate.value!),
+        "endDate": endDate.value == null ? null : DateFormat("yyyy-MM-dd").format(endDate.value!),
+      });
       if (slotsData != null) {
         final List<Map<String, dynamic>> newSlots = slotsData['docs']?.cast<Map<String, dynamic>>() ?? [];
         final int totalPages = int.tryParse(slotsData['totalPages'].toString()) ?? 1;
@@ -213,15 +217,6 @@ class ProfileCtrl extends GetxController {
     update();
   }
 
-  void toggleEditMode() {
-    isEditMode = !isEditMode;
-    if (isEditMode) {
-      consultationFeeController.text = user.value.pricing.consultationFee.toString();
-      followUpFeeController.text = user.value.pricing.followUpFee.toString();
-    }
-    update();
-  }
-
   Future<void> pickAvatar() async {
     final result = await helper.pickImage();
     if (result != null) {
@@ -322,10 +317,10 @@ class ProfileCtrl extends GetxController {
         final success = await authService.updateProfile(formData);
         if (success) {
           await loadUserData();
-          isEditMode = false;
           update();
           final homeCtrl = Get.find<HomeCtrl>();
           homeCtrl.loadUserData();
+          Get.close(1);
           toaster.success('Profile updated successfully');
         }
       } catch (e) {

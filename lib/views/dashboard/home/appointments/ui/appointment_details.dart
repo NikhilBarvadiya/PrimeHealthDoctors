@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:prime_health_doctors/utils/decoration.dart';
 import 'package:prime_health_doctors/utils/toaster.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:prime_health_doctors/models/appointment_model.dart';
@@ -38,36 +39,49 @@ class _AppointmentDetailsState extends State<AppointmentDetails> {
             backgroundColor: Colors.white,
             pinned: true,
             floating: true,
-            title: Text(
-              'Appointment Details',
-              style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
+            title: Column(
+              spacing: 2.0,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Appointment',
+                  style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
+                ),
+                Text(
+                  'Details',
+                  style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w400, color: AppTheme.textPrimary),
+                ),
+              ],
             ),
             leading: IconButton(
               style: IconButton.styleFrom(
-                backgroundColor: Colors.grey[100],
                 padding: const EdgeInsets.all(8),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                backgroundColor: Colors.white,
+                side: BorderSide(color: decoration.colorScheme.primary.withOpacity(.1)),
               ),
-              icon: Icon(Icons.arrow_back_rounded, color: AppTheme.textPrimary, size: 24),
+              icon: Icon(Icons.arrow_back_rounded, color: decoration.colorScheme.primary, size: 24),
               onPressed: () => Get.close(1),
             ),
             actions: [
               IconButton(
                 style: IconButton.styleFrom(
-                  backgroundColor: Colors.grey[100],
                   padding: const EdgeInsets.all(8),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  backgroundColor: Colors.white,
+                  side: BorderSide(color: decoration.colorScheme.primary.withOpacity(.1)),
                 ),
-                icon: Icon(Icons.phone_rounded, color: AppTheme.textPrimary, size: 20),
+                icon: Icon(Icons.phone_rounded, color: decoration.colorScheme.primary, size: 20),
                 onPressed: () => onCallAction(context, CallType.voice),
               ),
               IconButton(
                 style: IconButton.styleFrom(
-                  backgroundColor: Colors.grey[100],
                   padding: const EdgeInsets.all(8),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  backgroundColor: Colors.white,
+                  side: BorderSide(color: decoration.colorScheme.primary.withOpacity(.1)),
                 ),
-                icon: Icon(Icons.videocam_rounded, color: AppTheme.textPrimary, size: 20),
+                icon: Icon(Icons.videocam_rounded, color: decoration.colorScheme.primary, size: 20),
                 onPressed: () => onCallAction(context, CallType.video),
               ),
               const SizedBox(width: 10),

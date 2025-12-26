@@ -52,9 +52,6 @@ class AppointmentsCtrl extends GetxController {
         final appointments = data.map((item) => AppointmentModel.fromMap(item)).toList();
         allAppointments.assignAll(appointments);
         hasMore.value = data.length >= limit;
-        if (appointments.isEmpty) {
-          toaster.info("No appointments found");
-        }
       } else {
         allAppointments.clear();
         hasMore.value = false;

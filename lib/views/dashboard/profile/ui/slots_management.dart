@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:prime_health_doctors/utils/decoration.dart';
 import 'package:prime_health_doctors/utils/theme/light.dart';
 import 'package:prime_health_doctors/views/dashboard/profile/profile_ctrl.dart';
 import 'package:shimmer/shimmer.dart';
@@ -49,33 +50,25 @@ class _SlotsManagementState extends State<SlotsManagement> {
         ),
         leading: IconButton(
           style: IconButton.styleFrom(
-            backgroundColor: Colors.grey[100],
             padding: const EdgeInsets.all(8),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            backgroundColor: Colors.white,
+            side: BorderSide(color: decoration.colorScheme.primary.withOpacity(.1)),
           ),
-          icon: Icon(Icons.arrow_back_rounded, color: AppTheme.textPrimary, size: 24),
+          icon: Icon(Icons.arrow_back_rounded, color: decoration.colorScheme.primary, size: 24),
           onPressed: () => Get.close(1),
         ),
         actions: [
           IconButton(
             style: IconButton.styleFrom(
-              backgroundColor: Colors.grey[100],
               padding: const EdgeInsets.all(8),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              backgroundColor: Colors.white,
+              side: BorderSide(color: decoration.colorScheme.primary.withOpacity(.1)),
             ),
-            icon: Icon(Icons.filter_list_rounded, color: AppTheme.primaryBlue, size: 20),
+            icon: Icon(Icons.filter_list_rounded, color: decoration.colorScheme.primary, size: 20),
             onPressed: _showFiltersDialog,
             tooltip: 'Filter Slots',
-          ),
-          IconButton(
-            style: IconButton.styleFrom(
-              backgroundColor: AppTheme.primaryBlue,
-              padding: const EdgeInsets.all(8),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            icon: Icon(Icons.add_rounded, color: Colors.white, size: 20),
-            onPressed: _showAddSlotDialog,
-            tooltip: 'Add New Slot',
           ),
           const SizedBox(width: 10),
         ],
@@ -106,11 +99,16 @@ class _SlotsManagementState extends State<SlotsManagement> {
               ),
               _buildSlotsList(),
               if (ctrl.isLoadingSlots.value) _buildLoadingMoreSlots(),
-              const SliverToBoxAdapter(child: SizedBox(height: 20)),
+              SliverToBoxAdapter(child: SizedBox(height: Get.height * .1)),
             ],
           ),
         );
       }),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _showAddSlotDialog,
+        icon: Icon(Icons.add_rounded, color: Colors.white, size: 20),
+        label: Text("Add Slot"),
+      ),
     );
   }
 
