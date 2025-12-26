@@ -33,6 +33,7 @@ class HomeCtrl extends GetxController {
   }
 
   onAPICalling() async {
+    loadUserData();
     await loadTodayAppointments();
     await loadConsultedPatients();
   }
