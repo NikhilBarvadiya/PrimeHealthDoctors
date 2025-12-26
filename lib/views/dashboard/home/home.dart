@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
+import 'package:prime_health_doctors/views/dashboard/profile/ui/slots_management.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:prime_health_doctors/models/appointment_model.dart';
 import 'package:prime_health_doctors/models/patient_model.dart';
@@ -93,6 +94,15 @@ class Home extends StatelessWidget {
         ),
       ),
       actions: [
+        IconButton(
+          style: ButtonStyle(
+            shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+            padding: WidgetStatePropertyAll(const EdgeInsets.all(8)),
+            backgroundColor: WidgetStatePropertyAll(Colors.grey[100]),
+          ),
+          icon: const Icon(Icons.schedule_rounded, color: Colors.black87, size: 20),
+          onPressed: () => Get.to(() => SlotsManagement()),
+        ),
         Padding(
           padding: const EdgeInsets.only(right: 10.0),
           child: IconButton(

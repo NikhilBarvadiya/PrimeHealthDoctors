@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:prime_health_doctors/utils/routes/route_name.dart';
 import 'package:prime_health_doctors/utils/theme/light.dart';
 import 'package:prime_health_doctors/views/dashboard/profile/profile_ctrl.dart';
-import 'package:prime_health_doctors/views/dashboard/profile/ui/slots_management.dart';
 
 class Settings extends StatelessWidget {
   const Settings({super.key});
@@ -43,12 +42,6 @@ class Settings extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSectionHeader('Clinic & Practice'),
-                    const SizedBox(height: 16),
-                    _buildSettingsCard(
-                      children: [_buildSettingsTile(icon: Icons.schedule_rounded, title: 'Time Slots', subtitle: 'Manage appointment time slots', onTap: () => Get.to(() => const SlotsManagement()))],
-                    ),
-                    const SizedBox(height: 32),
                     _buildSectionHeader('Legal & Support'),
                     const SizedBox(height: 16),
                     _buildSettingsCard(
