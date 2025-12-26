@@ -25,11 +25,12 @@ class LoginCtrl extends GetxController {
       String getToken = await CallingService().getToken() ?? "";
       final loginRequest = {'mobileNo': mobileCtrl.text.trim(), 'machineId': machineId, "fcm": getToken};
       final loginResponse = await authService.login(loginRequest);
-      if (loginResponse != null && loginResponse['doctorId'] != null) {
-        final otpRequest = {'mobileNo': mobileCtrl.text.trim(), 'doctorId': loginResponse['doctorId']};
+      if (loginResponse != null) {
+        final doctorId = loginResponse['doctor']["id"] ?? loginResponse['doctor']["_id"];
+        final otpRequest = {'mobileNo': mobileCtrl.text.trim(), 'doctorId': doctorId};
         final otpSent = await authService.sendOTP(otpRequest);
         if (otpSent) {
-          Get.toNamed(AppRouteNames.verifyOtp, arguments: {'mobileNo': mobileCtrl.text.trim(), 'machineId': machineId, 'doctorId': loginResponse['doctorId']});
+          Get.toNamed(AppRouteNames.verifyOtp, arguments: {'mobileNo': mobileCtrl.text.trim(), 'machineId': machineId, 'doctorId': doctorId});
         }
       }
     } catch (err) {

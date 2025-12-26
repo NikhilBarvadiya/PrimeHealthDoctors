@@ -23,7 +23,6 @@ dependencies:
   font_awesome_flutter: ^10.10.0
   cached_network_image: ^3.4.1
   firebase_core: ^4.1.1
-  dart_jsonwebtoken: ^3.2.0
   http: ^1.5.0
   agora_rtc_engine: ^6.5.3
   agora_token_generator: ^1.0.0
@@ -35,6 +34,7 @@ dependencies:
   audioplayers: ^6.5.1
   vibration: ^3.1.4
   shimmer: ^3.0.0
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:

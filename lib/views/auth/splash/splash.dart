@@ -114,28 +114,7 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
             borderRadius: BorderRadius.circular(28),
             boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 40, offset: const Offset(0, 20))],
             gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Colors.white, Color(0xFFF0F9FF)]),
-          ),
-          child: Stack(
-            children: [
-              Center(
-                child: Container(
-                  width: 70,
-                  height: 70,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [AppTheme.primaryLight, AppTheme.primaryBlue]),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-              Center(
-                child: Icon(
-                  Icons.medical_services_rounded,
-                  size: 48,
-                  color: Colors.white,
-                  shadows: [Shadow(color: Colors.black.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 2))],
-                ),
-              ),
-            ],
+            image: DecorationImage(image: AssetImage("assets/fg_logo.png")),
           ),
         ),
       ),
@@ -150,8 +129,8 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
         child: Column(
           children: [
             Text(
-              'PrimeHealth',
-              style: GoogleFonts.inter(fontSize: 36, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: -0.5, height: 1.1),
+              'Prime Health',
+              style: GoogleFonts.inter(fontSize: 36, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: 0.5, height: 1.1),
             ),
             const SizedBox(height: 4),
             Text(
