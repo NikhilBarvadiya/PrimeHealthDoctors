@@ -2,9 +2,18 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:prime_health_doctors/utils/toaster.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Helper {
   final ImagePicker _picker = ImagePicker();
+
+  Future<void> launchURL(String val) async {
+    if (await canLaunchUrl(Uri.parse(val))) {
+      await launchUrl(Uri.parse(val));
+    } else {
+      throw 'Could not launch $val';
+    }
+  }
 
   Future<File?> pickImage({ImageSource? source}) async {
     try {
@@ -30,6 +39,15 @@ class Helper {
       deviceIdentifier = iosInfo.identifierForVendor!;
     }
     return deviceIdentifier;
+  }
+
+  void makePhoneCall(String phoneNumber) async {
+    final Uri launchUri = Uri(scheme: 'tel', path: phoneNumber);
+    try {
+      await launchUrl(launchUri);
+    } catch (err) {
+      toaster.warning("Invalid phone number...!");
+    }
   }
 }
 

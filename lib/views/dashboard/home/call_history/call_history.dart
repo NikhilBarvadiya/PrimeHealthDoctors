@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:prime_health_doctors/utils/decoration.dart';
 import 'package:prime_health_doctors/utils/theme/light.dart';
 import 'package:prime_health_doctors/models/appointment_model.dart';
 import 'package:prime_health_doctors/models/call_log_model.dart';
@@ -47,12 +48,13 @@ class _CallHistoryState extends State<CallHistory> {
       floating: true,
       automaticallyImplyLeading: false,
       leading: IconButton(
-        style: ButtonStyle(
-          shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-          padding: WidgetStatePropertyAll(const EdgeInsets.all(8)),
-          backgroundColor: WidgetStatePropertyAll(Colors.grey[100]),
+        style: IconButton.styleFrom(
+          padding: const EdgeInsets.all(8),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          backgroundColor: Colors.white,
+          side: BorderSide(color: decoration.colorScheme.primary.withOpacity(.1)),
         ),
-        icon: const Icon(Icons.arrow_back, color: Colors.black87, size: 20),
+        icon: Icon(Icons.arrow_back_rounded, color: decoration.colorScheme.primary, size: 24),
         onPressed: () => Get.close(1),
       ),
       title: Text(
