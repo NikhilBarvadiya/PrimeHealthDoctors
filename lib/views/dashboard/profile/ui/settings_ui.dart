@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:prime_health_doctors/utils/decoration.dart';
 import 'package:prime_health_doctors/utils/helper.dart';
-import 'package:prime_health_doctors/utils/routes/route_name.dart';
 import 'package:prime_health_doctors/utils/theme/light.dart';
 import 'package:prime_health_doctors/views/dashboard/profile/profile_ctrl.dart';
 
@@ -209,10 +208,7 @@ class Settings extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
-                        ctrl.logout();
-                        Get.offAllNamed(AppRouteNames.login);
-                      },
+                      onPressed: () => ctrl.logout(),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.emergencyRed,
                         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -275,10 +271,7 @@ class Settings extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
-                        ctrl.deleteAccount();
-                        Get.offAllNamed(AppRouteNames.login);
-                      },
+                      onPressed: () => ctrl.deleteAccount(),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.emergencyRed,
                         padding: const EdgeInsets.symmetric(vertical: 12),
