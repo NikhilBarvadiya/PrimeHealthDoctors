@@ -207,7 +207,7 @@ class Register extends StatelessWidget {
         const SizedBox(height: 8),
         TextFormField(
           controller: ctrl.mobileCtrl,
-          keyboardType: TextInputType.phone,
+          keyboardType: TextInputType.numberWithOptions(signed: true),
           textInputAction: TextInputAction.next,
           maxLength: 10,
           style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: AppTheme.textPrimary),

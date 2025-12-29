@@ -59,8 +59,8 @@ class AuthService extends GetxService {
         toaster.warning(response.message ?? 'Failed to login');
         return null;
       }
-      if (response.message == "OTP sent to mobile number") {
-        final doctorId = response.data['doctor']["id"] ?? response.data['doctor']["_id"];
+      if (response.message == "OTP sent to mobile number.") {
+        final doctorId = response.data['doctorId'] ?? response.data['doctor']["id"] ?? response.data['doctor']["_id"];
         final otpRequest = {'mobileNo': request["mobileNo"], 'doctorId': doctorId};
         final otpSent = await sendOTP(otpRequest);
         if (otpSent) {
@@ -151,7 +151,6 @@ class AuthService extends GetxService {
   Future<dynamic> getSlots(Map<String, dynamic> request) async {
     try {
       final response = await ApiManager().call(APIIndex.slots, request, ApiType.post);
-      print(response);
       if (response.status == 200 && response.data != null && response.data != 0) {
         return response.data;
       } else {
@@ -159,7 +158,6 @@ class AuthService extends GetxService {
         return [];
       }
     } catch (err) {
-      print(err);
       toaster.error('Slots loading failed: ${err.toString()}');
       return [];
     }

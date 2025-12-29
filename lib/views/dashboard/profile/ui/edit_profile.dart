@@ -367,7 +367,7 @@ class _EditProfileState extends State<EditProfile> {
           controller: controller,
           readOnly: readOnly,
           textInputAction: TextInputAction.done,
-          keyboardType: isPhone ? TextInputType.phone : (isEmail ? TextInputType.emailAddress : TextInputType.text),
+          keyboardType: isPhone ? TextInputType.numberWithOptions(signed: true) : (isEmail ? TextInputType.emailAddress : TextInputType.text),
           style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: readOnly ? AppTheme.textSecondary : AppTheme.textPrimary),
           decoration: InputDecoration(
             prefixIcon: Icon(icon, color: AppTheme.textSecondary, size: 20),
@@ -535,7 +535,7 @@ class _EditProfileState extends State<EditProfile> {
                   controller: controller,
                   cursorHeight: 28,
                   cursorRadius: Radius.circular(10.0),
-                  keyboardType: TextInputType.number,
+                  keyboardType: TextInputType.numberWithOptions(signed: true),
                   textInputAction: TextInputAction.done,
                   style: GoogleFonts.inter(fontSize: 32, fontWeight: FontWeight.w800, color: color),
                   decoration: InputDecoration(
