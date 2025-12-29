@@ -26,7 +26,7 @@ class CallingInitMethod {
   Future<void> initData() async {
     final hasPermissions = await PermissionService.requestAllPermissions();
     if (!hasPermissions && context != null && context!.mounted) {
-      ScaffoldMessenger.of(context!).showSnackBar(const SnackBar(content: Text('')));
+      ScaffoldMessenger.of(context!).showSnackBar(const SnackBar(content: Text('Camera and microphone permissions required')));
     }
     await CallingService().initialize();
     _setupFCMListeners();

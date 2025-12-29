@@ -5,7 +5,6 @@ import 'package:prime_health_doctors/models/appointment_model.dart';
 import 'package:prime_health_doctors/models/calling_model.dart';
 import 'package:prime_health_doctors/models/user_model.dart';
 import 'package:prime_health_doctors/service/agora_service.dart';
-import 'package:prime_health_doctors/service/calling_init_method.dart';
 import 'package:prime_health_doctors/service/calling_service.dart';
 
 class CallingView extends StatefulWidget {
@@ -111,7 +110,6 @@ class _CallingViewState extends State<CallingView> with TickerProviderStateMixin
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        key: CallingInitMethod().navigatorKey,
         backgroundColor: Colors.black,
         body: GestureDetector(
           onTap: _showControlsTemporary,
